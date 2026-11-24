@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: calm, factual engineering review for a senior Japanese manager; few words, big numbers, things moving.
-   IDEA: a robot cell commissioning board: each slide is a cell under test, with a live process simulation.
+   IDEA: a robot commissioning board: each slide is a robot under test, with a live process simulation.
    PICTURE: SVG robot arms running each real process step by step, beside real factory footage.
    COLOUR and TYPE: concrete white floor, graphite ink, robot orange for motion, signal green for OK, steel blue for PLC/vision. Barlow + Barlow Condensed.
    LAYOUT: fixed 16:9 stage scaled to the screen; title top-left, simulation large, facts in a narrow right column. */
@@ -106,7 +106,7 @@ ul.pts{margin:0;padding-left:22px}ul.pts li{margin:4px 0}
 #notes.on{display:block}
 button:focus-visible{outline:3px solid var(--or);outline-offset:2px}
 svg text{font-family:Barlow,sans-serif}
-.link{fill:#eceae4;stroke:#2a2e33;stroke-width:2.5}
+.link{fill:#f2f1ec;stroke:#2a2e33;stroke-width:2.5}
 .joint{fill:#2a2e33}.jdot{fill:var(--or)}
 #live{position:absolute;top:14px;right:20px;z-index:8;display:flex;gap:8px;align-items:center;font-size:16px;color:var(--mute)}
 #live button{font:600 16px Barlow;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;color:var(--ink)}
@@ -116,10 +116,17 @@ svg text{font-family:Barlow,sans-serif}
 #qr #qrc{display:grid;place-items:center;min-height:260px;margin:12px 0}#qr #qrc img,#qr #qrc canvas{width:260px;height:260px}
 #qr a{word-break:break-all;color:var(--bl)}#qr button{font:600 17px Barlow;padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:#f3f2ee;cursor:pointer;margin-top:10px}
 html.viewer #nav button,html.viewer #nbtn{display:none}html.viewer #stage .slide{pointer-events:none}html.viewer #count{margin-left:auto}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#101317}.split>svg,.split>video{width:100%;height:100%;min-height:0;object-fit:contain;background:#fbfaf7}.split>video{background:#101317}
+.split .tg{position:absolute;top:10px;left:10px;background:var(--ink);color:#fff;font-size:17px;font-weight:700;padding:4px 10px;border-radius:6px}.split .tg.r{left:calc(50% + 12px);background:var(--or)}
+#ink{position:absolute;left:0;top:0;width:1600px;height:900px;z-index:7;pointer-events:none}
+html.drawing #ink{pointer-events:auto;touch-action:none;cursor:crosshair}
+#remote .md{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}#remote .md button{padding:10px 12px;font-size:15px;background:#2a2e33;color:#f3f2ee}#remote .md button.on{background:#1d5fbf}
+#remote .md button.pl{background:#1b8a50;font-size:17px;flex-basis:100%}#remote .tl2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}#remote .tl2 button{padding:14px 8px;font-size:17px;background:#2a2e33;color:#fff}
+html.drawing #rpen{background:#e8590c}
 #remote{display:none}
-html.remote body{overflow:auto;background:#16191d}html.remote #wrap{position:relative;inset:auto}
+html.remote,html.remote body{height:auto;overflow:auto;background:#16191d}html.remote #wrap{position:relative;inset:auto}
 html.remote #stage{top:0;transform-origin:top center}html.remote #nav,html.remote #live{display:none}
-html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 14px 40px;color:#f3f2ee;font:17px/1.45 Barlow,system-ui,sans-serif}
+html.remote #remote{display:block;position:static;padding:12px 14px 60px;color:#f3f2ee;font:17px/1.45 Barlow,system-ui,sans-serif}
 #remote .rb{display:grid;grid-template-columns:1fr 1fr;gap:10px}#remote button{font:700 20px Barlow,system-ui,sans-serif;padding:18px 10px;border-radius:12px;border:0;background:#f3f2ee;color:#16191d}
 #remote button.nx{background:#e8590c;color:#fff}#remote .top{display:flex;justify-content:space-between;align-items:center;margin:10px 0}
 #remote .lv{display:flex;gap:10px;align-items:center;margin:8px 0}#remote .lv button{padding:12px 14px;font-size:17px;background:#2a2e33;color:#fff;flex:1}
@@ -132,7 +139,7 @@ html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 
 <div id="wrap"><div id="stage">
 
 <!-- 1 COVER -->
-<section class="slide" data-title="Profile" data-notes="Good morning. I am Fais, an Automation and Robotics Engineer with more than four years in robot cells, machine vision and production support. Today I will show the robot projects I built, with simulation and real footage, and what I can bring to PAPAMY.">
+<section class="slide" data-title="Profile" data-notes="Good morning. I am Fais, an Automation and Robotics Engineer with more than four years in robots, machine vision and production support. Today I will show the robot projects I built, with simulation and real footage, and what I can bring to PAPAMY.">
   <div class="cover">
     <div>
       <div class="kick">Final interview · Production Engineering – Executive</div>
@@ -142,7 +149,7 @@ html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 
       <div class="stats">
         <div class="card"><div class="big">8×</div><div class="lbl">Output with Estun grinding robot<br>10,000 → 80,000 pcs/day</div></div>
         <div class="card"><div class="big">−42%</div><div class="lbl">Inspection cycle time with vision part ID<br>2:00 → 1:10</div></div>
-        <div class="card"><div class="big">RM1.6M</div><div class="lbl">Robot cells delivered at DFS<br>Estun · Nachi × 2</div></div>
+        <div class="card"><div class="big">RM1.6M</div><div class="lbl">Robot projects delivered at DFS<br>Estun · Nachi × 2</div></div>
         <div class="card"><div class="big" style="font-size:50px">~1.0→0.5%</div><div class="lbl">Defect rate after AI vision inspection (Kossan)</div></div>
       </div>
     </div>
@@ -151,13 +158,13 @@ html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 
 </section>
 
 <!-- 2 JOURNEY -->
-<section class="slide" data-title="Journey" data-notes="My interest in robots started as a student: in 2018 our humanoid robot won 1st place at FIRA RoboWorld Cup in Taiwan. Then I worked as a Robotic Engineer at DFS building Nachi and Estun cells, moved to Kossan for production machines and vision, and now I work on machine vision for lithium battery lines at Linergy.">
+<section class="slide" data-title="Journey" data-notes="My interest in robots started as a student: in 2018 our humanoid robot won 1st place at FIRA RoboWorld Cup in Taiwan. Then I worked as a Robotic Engineer at DFS building Nachi and Estun robots, moved to Kossan for production machines and vision, and now I work on machine vision for lithium battery lines at Linergy.">
   <div class="kick">My path</div>
   <h2>Robots since 2018 – from competition to production lines</h2>
   <div class="tl">
     <div class="card"><div class="yr">2018</div><h3>FIRA RoboWorld Cup, Taiwan</h3><p>1st place, HuroCup Marathon. Humanoid robot with OpenCV vision. Also Gold, FIRA Malaysia Cup and iCompEx.</p></div>
     <div class="card"><div class="yr">2022 – 2023</div><h3>BEng Electrical, UniMAP · Kozato Kizai</h3><p>R&amp;D technician: feasibility studies, process and packaging improvement.</p></div>
-    <div class="card"><div class="yr">2023 – 2024</div><h3>Robotic Engineer · DFS Engineering</h3><p>Nachi and Estun robot cells: offline simulation, teaching, robot–PLC, Keyence vision, commissioning.</p></div>
+    <div class="card"><div class="yr">2023 – 2024</div><h3>Robotic Engineer · DFS Engineering</h3><p>Nachi and Estun robots: offline simulation, teaching, robot–PLC, Keyence vision, commissioning.</p></div>
     <div class="card"><div class="yr">2024 – 2026</div><h3>Backend Automation &amp; Maintenance · Kossan</h3><p>Glove line automation, AI vision, PM, IQ/OQ/PQ, SOP/WI/OPL.</p></div>
     <div class="card now"><div class="yr">Oct 2026 – now</div><h3>Machine Vision Engineer II · Linergy Power</h3><p>Vision for lithium battery: line-scan, winding and welding inspection.</p></div>
   </div>
@@ -165,15 +172,15 @@ html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 
 </section>
 
 <!-- 3 HOW I BUILD -->
-<section class="slide" data-title="Method" data-notes="This is how I build every robot cell. I simulate first in Nachi FD on Desk, so reach, cycle time and collisions are checked before the machine arrives. Then teach on site, integrate with the PLC and vision, test full cycles, and finally hand over with SOP and OPL so operators can run it.">
-  <div class="kick">How I build a robot cell</div>
+<section class="slide" data-title="Method" data-notes="This is how I build every robot project. I simulate first in Nachi FD on Desk, so reach, cycle time and collisions are checked before the machine arrives. Then teach on site, integrate with the PLC and vision, test full cycles, and finally hand over with SOP and OPL so operators can run it.">
+  <div class="kick">How I build a robot project</div>
   <h2>Simulate first, then teach, integrate and hand over</h2>
   <div class="row">
-    <div class="main"><div class="media"><img src="media/fd_sim.jpg" alt="Nachi FD on Desk offline simulation of the hot glue cell, MZ07L robot, glue position program"></div>
-      <div class="note" style="margin-top:8px">Real offline simulation · Nachi FD on Desk · Hot Glue cell, MZ07L robot, June 2023</div></div>
+    <div class="main"><div class="media"><img src="media/fd_sim.jpg" alt="Nachi FD on Desk offline simulation of the hot glue robot, MZ07L robot, glue position program"></div>
+      <div class="note" style="margin-top:8px">Real offline simulation · Nachi FD on Desk · Hot Glue, MZ07L robot, June 2023</div></div>
     <div class="side">
       <div class="flow" style="grid-template-columns:1fr">
-        <div class="card"><div class="n">1</div><h3>Offline simulation</h3><p>Check reach, path, collision and cycle time before the cell is built.</p></div>
+        <div class="card"><div class="n">1</div><h3>Offline simulation</h3><p>Check reach, path, collision and cycle time before the robot is installed.</p></div>
         <div class="card"><div class="n">2</div><h3>Teach on site</h3><p>Teach pendant: positions, tool change, speeds.</p></div>
         <div class="card"><div class="n">3</div><h3>Integrate</h3><p>Robot ↔ PLC handshake, Keyence vision, HMI.</p></div>
         <div class="card"><div class="n">4</div><h3>Full cycle test → handover</h3><p>Tune cycle time, then SOP / WI / OPL for operators.</p></div>
@@ -192,7 +199,7 @@ html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 
     <div class="side">
       <div class="card"><div class="lbl">Output per day</div>
         <div style="font-size:19px;margin-top:8px">Manual grinding</div><div class="bar"><i data-w="12.5">10,000</i></div>
-        <div style="font-size:19px">Estun robot cell</div><div class="bar"><i class="or" data-w="100">80,000</i></div></div>
+        <div style="font-size:19px">Estun robot</div><div class="bar"><i class="or" data-w="100">80,000</i></div></div>
       <div class="card"><h3>My role</h3><ul class="pts"><li>6-axis Estun robot for grinding steel piling components</li><li>Grinding path teaching and tuning</li><li>Less manual labour, consistent finish</li></ul></div>
       <div class="note">Animation is a simplified process illustration.</div>
     </div>
@@ -207,18 +214,18 @@ html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 
     <div class="main">
       <div class="tabs" data-for="m-glue">
         <button aria-pressed="true" data-show="0">Process simulation</button>
-        <button data-show="1">FD on Desk</button>
-        <button data-show="2">Glue trial</button>
-        <button data-show="3">Glue on product</button>
-        <button data-show="4">Real tool change</button>
+        <button data-show="1">Tool change: sim vs real</button>
+        <button data-show="2">FD on Desk</button>
+        <button data-show="3">Glue trial</button>
+        <button data-show="4">Glue on product</button>
         <button data-show="5">Full cycle test</button>
       </div>
       <div class="media" id="m-glue">
         <svg class="sim" id="sc-glue" viewBox="0 0 800 440" role="img" aria-label="Simulation: robot changes between glue gun and knife, glues and cuts part"></svg>
-        <img src="media/fd_sim.jpg" alt="FD on Desk simulation of hot glue cell" hidden>
+        <div class="split" hidden><svg class="sim" id="sc-glue2" viewBox="0 0 800 440" role="img" aria-label="Simulation of tool change"></svg><video src="media/toolchange_cut.mp4" poster="media/toolchange_cut_poster.jpg" controls muted playsinline preload="metadata"></video><span class="tg">Simulation</span><span class="tg r">Real</span></div>
+        <img src="media/fd_sim.jpg" alt="FD on Desk simulation of hot glue robot" hidden>
         <video src="media/glue_trial.mp4" poster="media/glue_trial_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
         <video src="media/glue_product.mp4" poster="media/glue_product_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
-        <video src="media/toolchange.mp4" poster="media/toolchange_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
         <video src="media/hotglue_fulltest.mp4" poster="media/hotglue_fulltest_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
       </div>
       <div class="steps" id="st-glue"><span>1 · Clamp</span><span>2 · Take glue gun</span><span>3 · Glue</span><span>4 · Change to knife</span><span>5 · Cut</span><span>6 · Release</span></div>
@@ -241,39 +248,23 @@ html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 
   <h2>Magnet flipping – manual handling removed</h2>
   <div class="row">
     <div class="main">
-      <div class="tabs" data-for="m-mag"><button aria-pressed="true" data-show="0">Process simulation</button><button data-show="1">Real cell</button></div>
+      <div class="tabs" data-for="m-mag"><button aria-pressed="true" data-show="0">Process simulation</button><button data-show="1">Office test → on-site</button><button data-show="2">Showreel clip</button></div>
       <div class="media" id="m-mag">
         <svg class="sim" id="sc-mag" viewBox="0 0 800 440" role="img" aria-label="Simulation: robot picks magnet, flips it and places it on coating line"></svg>
+        <video src="media/magnet_full.mp4" poster="media/magnet_full_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
         <video src="media/magnet.mp4" poster="media/magnet_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
       </div>
       <div class="steps" id="st-mag"><span>1 · Pick at station</span><span>2 · Flip 180°</span><span>3 · Place on coating line</span></div>
     </div>
     <div class="side">
       <div class="card"><h3>Before → After</h3><div style="font-size:20px">Operator flips each magnet by hand <span style="color:var(--or);font-weight:700">→</span> robot flips every magnet, same way, every cycle.</div></div>
-      <div class="card"><h3>My role</h3><ul class="pts"><li>Nachi robot program and taught positions</li><li>Cell control with Nachi internal PLC only</li><li>Operator recovery workflow on the pendant HMI</li></ul></div>
+      <div class="card"><h3>My role</h3><ul class="pts"><li>Nachi robot program and taught positions</li><li>Control with Nachi internal PLC only</li><li>Operator recovery workflow on the pendant HMI</li></ul></div>
       <div class="card"><span class="chip g">Safety</span><span class="chip g">Consistency</span><span class="chip g">Less repetitive work</span></div>
     </div>
   </div>
 </section>
 
-<!-- 7 VISION PART ID -->
-<section class="slide" data-title="Vision ID" data-notes="Keyence vision for part identification at DFS. The camera identifies the part type and the robot selects the right program automatically. Inspection cycle time went from 2 minutes to 1 minute 10 seconds, and manual inspection errors were eliminated.">
-  <div class="kick">DFS Engineering · Keyence vision + robot</div>
-  <h2>Vision tells the robot which part – 2:00 → 1:10</h2>
-  <div class="row">
-    <div class="main"><div class="media"><svg class="sim" id="sc-vis" viewBox="0 0 800 440" role="img" aria-label="Simulation: camera identifies part type, robot sorts it to the right bin"></svg></div>
-      <div class="steps" id="st-vis"><span>1 · Part arrives</span><span>2 · Camera identifies</span><span>3 · PLC sends type to robot</span><span>4 · Robot picks &amp; sorts</span></div></div>
-    <div class="side">
-      <div class="card"><div class="lbl">Inspection cycle time</div>
-        <div style="font-size:19px;margin-top:8px">Manual check</div><div class="bar"><i data-w="100">2 min 00 s</i></div>
-        <div style="font-size:19px">Vision part ID</div><div class="bar"><i class="or" data-w="58">1 min 10 s</i></div>
-        <div class="big" style="color:var(--or)">−42%</div></div>
-      <div class="card"><h3>How it works</h3><div style="font-size:20px">Keyence result (string) → PLC → converted to a number the robot uses to select the program.</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- 8 HMI -->
+<!-- 7 HMI -->
 <section class="slide" data-title="HMI" data-notes="A small kaizen from the shop floor. After a stop, operators had to press two panels – PLC first, then Nachi – to recover the robot. I moved the recovery into the Nachi pendant HMI with taught positions before homing. Now one panel, and restart time dropped from about 3 to 4 minutes to 1 to 2 minutes. These are estimates from shop-floor observation.">
   <div class="kick">Operator-focused kaizen</div>
   <h2>Robot recovery – from 2 panels to 1</h2>
@@ -296,44 +287,64 @@ html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 
       </div>
     </div>
     <div class="side">
-      <div class="tabs" data-for="m-hmi"><button aria-pressed="true" data-show="0">HMI photo</button><button data-show="1">HMI in use</button></div>
+      <div class="tabs" data-for="m-hmi"><button aria-pressed="true" data-show="0">Robot simulation</button><button data-show="1">HMI photo</button><button data-show="2">HMI in use</button></div>
       <div class="media" id="m-hmi">
-        <img src="media/hmi_photo.jpg" alt="Nachi teach pendant HMI with GO HOME button">
+        <svg class="sim" id="sc-hmi" viewBox="0 0 520 560" role="img" aria-label="Simulation: robot moves from pickup jig to taught clearance to home"></svg>
+        <img src="media/hmi_photo.jpg" alt="Nachi teach pendant HMI with GO HOME button" hidden>
         <video src="media/hmi_video.mp4" poster="media/hmi_video_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 9 VISION ON LINE -->
-<section class="slide" data-title="Vision line" data-notes="At Kossan I worked on production lines in operation. AI vision reduced the defect rate from about 1.0 to 0.5 percent. One example: the AI flagged folded cuffs as tears. By comparing images I found two different conditions; after sensitivity tuning with the PEM vision team, recorded rejects dropped from 99 to 47 per hour in a one-hour check, with follow-up across shifts planned. I also built the USG system that removes defective gloves automatically. Now at Linergy I do the same vision work for lithium battery lines.">
-  <div class="kick">Kossan 2024–2026 · Linergy now</div>
-  <h2>Vision and automation on running lines</h2>
+<!-- 8 VISION INSPECT + REJECT -->
+<section class="slide" data-title="Vision reject" data-notes="At Kossan the glove line runs non-stop. The camera inspects every glove on the former. The AI decides Good or NG. Good gloves continue; an NG glove is pulled off by the catcher – the USG system I developed in 2025 – so no defect goes forward and double dipping is avoided. AI vision reduced the defect rate from about 1.0 to 0.5 percent.">
+  <div class="kick">Kossan · 2024–2025 · AI vision + USG catcher</div>
+  <h2>Camera inspects every glove – NG is pulled off automatically</h2>
   <div class="row">
     <div class="main">
-      <div class="tabs" data-for="m-ks"><button aria-pressed="true" data-show="0">Production line clip</button><button data-show="1">USG machine</button><button data-show="2">USG in operation</button></div>
-      <div class="media" id="m-ks">
-        <video src="media/line_clip.mp4" poster="media/line_clip_poster.jpg" controls muted playsinline preload="metadata"></video>
-        <img src="media/usg_jpg.jpg" alt="Installed USG machine on glove line" hidden>
+      <div class="tabs" data-for="m-vis"><button aria-pressed="true" data-show="0">Process simulation</button><button data-show="1">Production line</button><button data-show="2">USG in operation</button><button data-show="3">USG machine</button></div>
+      <div class="media" id="m-vis">
+        <svg class="sim" id="sc-vis" viewBox="0 0 800 440" role="img" aria-label="Simulation: gloves pass camera; NG glove is pulled off by catcher"></svg>
+        <video src="media/line_clip.mp4" poster="media/line_clip_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
         <video src="media/usg_mp4.mp4" poster="media/usg_mp4_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
+        <img src="media/usg_jpg.jpg" alt="Installed USG machine on glove line" hidden>
+      </div>
+      <div class="steps" id="st-vis"><span>1 · Glove arrives</span><span>2 · Camera inspects</span><span>3 · AI: Good / NG</span><span>4 · NG → catcher pulls glove</span></div>
+    </div>
+    <div class="side">
+      <div class="card"><div class="lbl">Result on line</div><div class="sig" id="v-good"><b></b>GOOD: <span id="v-gc">0</span> continue</div><div class="sig" id="v-ng"><b style="background:#cfcdc6"></b>NG: <span id="v-nc">0</span> pulled off by catcher</div></div>
+      <div class="card" style="padding:14px 20px"><div class="big" style="font-size:52px">~1.0 → 0.5%</div><div class="lbl">Defect rate after AI vision inspection</div></div>
+      <div class="card"><h3>How it works</h3><div style="font-size:20px">Camera → AI result → PLC → <b>USG catcher</b> removes the NG glove. No manual check, less double dipping.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 ROOT CAUSE -->
+<section class="slide" data-title="Root cause" data-notes="One example of root cause on a running line. The AI flagged both of these as Torn. By comparing images I found two different conditions: a real tear, and a folded cuff outside the normal inspection zone. After sensitivity tuning with the PEM vision team, recorded rejects dropped from 99 to 47 per hour in a one-hour check, with follow-up across shifts planned to confirm no missed tears. Now at Linergy I do the same vision work for lithium battery lines.">
+  <div class="kick">Kossan · Vision troubleshooting · Linergy now</div>
+  <h2>Root cause: real tear or folded cuff?</h2>
+  <div class="row">
+    <div class="main">
+      <div class="pair" style="flex:1;grid-template-columns:1fr 1fr">
+        <figure style="display:flex;flex-direction:column"><img src="media/tear.jpg" alt="Glove with real tear at cuff" style="flex:1;height:auto;min-height:0;object-fit:contain"><figcaption style="font-size:22px;padding:10px 14px">Real reject · tear at cuff</figcaption></figure>
+        <figure style="display:flex;flex-direction:column"><img src="media/fold.jpg" alt="Glove with folded cuff edge" style="flex:1;height:auto;min-height:0;object-fit:contain"><figcaption style="font-size:22px;padding:10px 14px">Over-reject · folded cuff edge</figcaption></figure>
       </div>
     </div>
     <div class="side">
-      <div class="card" style="padding:12px 20px"><div class="big" style="font-size:50px">~1.0 → 0.5%</div><div class="lbl">Defect rate after AI vision inspection</div></div>
-      <div class="card" style="padding:12px 20px"><h3 style="font-size:26px">Root cause: real tear vs folded cuff</h3>
-        <div class="pair" style="margin-top:8px"><figure><img src="media/tear.jpg" alt="Glove with real tear"><figcaption>Real reject · tear</figcaption></figure><figure><img src="media/fold.jpg" alt="Glove with folded cuff"><figcaption>Over-reject · fold</figcaption></figure></div>
-        <div class="ba" style="margin-top:10px"><div class="big" style="font-size:42px">99 → 47</div><div class="lbl">rejects/hr after tuning (1-hr check, with PEM Vision Team)</div></div></div>
-      <div class="card" style="padding:14px 20px"><span class="chip o">USG 2025</span> automatic defect removal, less double dipping<br><span class="chip">Linergy</span> line-scan vision for battery winding &amp; welding</div>
+      <div class="card"><div class="ba"><div class="big">99 → 47</div><div class="lbl">rejects/hr after sensitivity tuning</div></div><div class="note" style="margin-top:6px">1-hour check with PEM Vision Team · follow-up across shifts planned</div></div>
+      <div class="card"><h3>Genba → data → root cause</h3><div style="font-size:20px">Both triggered "Torn". Image comparison showed two different conditions – tune, then verify no missed tears.</div></div>
+      <div class="card"><span class="chip">Linergy now</span><div style="font-size:20px;margin-top:6px">Machine vision for lithium battery: line-scan, winding and welding inspection.</div></div>
     </div>
   </div>
 </section>
 
 <!-- 10 CLOSE -->
-<section class="slide" data-title="For PAPAMY" data-notes="What I bring: I can build and debug robot cells from simulation to handover; I connect robot, PLC and vision; and I improve the line with operators, using data and root cause. I follow genba, check data, find root cause, standardise and train. Thank you – arigatou gozaimasu. I am happy to answer questions.">
+<section class="slide" data-title="For PAPAMY" data-notes="What I bring: I can build and debug robots from simulation to handover; I connect robot, PLC and vision; and I improve the line with operators, using data and root cause. I follow genba, check data, find root cause, standardise and train. Thank you – arigatou gozaimasu. I am happy to answer questions.">
   <div class="kick">What I bring to PAPAMY</div>
-  <h2>Ready to build and improve robot cells on your lines</h2>
+  <h2>Ready to build and improve robots on your lines</h2>
   <div class="bring">
-    <div class="card"><h3>Robot cells, end to end</h3><p>Offline simulation, teaching, tool change, commissioning and cycle-time tuning (Nachi, Estun).</p></div>
+    <div class="card"><h3>Robots, end to end</h3><p>Offline simulation, teaching, tool change, commissioning and cycle-time tuning (Nachi, Estun).</p></div>
     <div class="card"><h3>Robot + PLC + vision</h3><p>Robot–PLC handshake, Omron PLC, Keyence and AI vision, HMI for operators.</p></div>
     <div class="card"><h3>Stable production</h3><p>Troubleshooting, PM, IQ/OQ/PQ, SOP/WI/OPL and training new engineers.</p></div>
   </div>
@@ -344,11 +355,12 @@ html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 
   </div>
 </section>
 
+<canvas id="ink" width="1600" height="900"></canvas>
 <div id="notes"></div>
 <div id="live" hidden><span class="dot"></span><span id="lstat"></span><button id="lbtn" hidden></button></div>
 <nav id="nav"><button id="prev" aria-label="Previous slide">← Back</button><div id="dots"></div><span id="count"></span><button id="nbtn" title="Speaker notes (N)">Notes</button><button id="fs" title="Full screen (F)">Full screen</button><button id="next" aria-label="Next slide">Next →</button></nav>
 </div></div>
-<div id="remote"><div class="lv"><span id="rstat">Presenter</span><button id="rlive">Start live session</button></div><div class="rb"><button id="rprev">← Back</button><button class="nx" id="rnext">Next →</button></div><div class="top"><span class="ttl" id="rttl"></span><span id="rcnt"></span></div><div class="nt" id="rnote"></div><div class="ds" id="rds"></div></div>
+<div id="remote"><div class="lv"><span id="rstat">Presenter</span><button id="rlive">Start live session</button></div><div class="rb"><button id="rprev">← Back</button><button class="nx" id="rnext">Next →</button></div><div class="top"><span class="ttl" id="rttl"></span><span id="rcnt"></span></div><div class="tl2"><button id="rpen">✏️ Pointer: OFF</button><button id="rclr">Clear drawing</button></div><div class="md" id="rmedia"></div><div class="nt" id="rnote"></div><div class="ds" id="rds"></div></div>
 <div id="qr" role="dialog" aria-label="Scan to follow"><div class="box"><b style="font-size:22px">Scan to follow this presentation</b><div id="qrc"></div><a id="qrl" target="_blank"></a><br><button id="qrx">Close</button></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
@@ -362,18 +374,20 @@ const tween=(ms,tok,fn)=>new Promise((res,rej)=>{const t0=performance.now();cons
 /* ---------- robot arm with simple 2-link IK, tool always pointing down ---------- */
 function Arm(svg,{bx,by,L1,L2,L3,s=1,tools}){
   const g=el('g',{},svg);
-  el('path',{d:`M${bx-40*s} ${by+70*s} L${bx-26*s} ${by} L${bx+26*s} ${by} L${bx+40*s} ${by+70*s}Z`,fill:'#3a3f45'},g);
-  el('rect',{x:bx-34*s,y:by-16*s,width:68*s,height:22*s,rx:6,fill:'#eceae4',stroke:'#2a2e33','stroke-width':2.5},g);
+  el('path',{d:`M${bx-46*s} ${by+80*s} L${bx-32*s} ${by+14*s} L${bx+32*s} ${by+14*s} L${bx+46*s} ${by+80*s}Z`,fill:'#3a3f45'},g);
+  el('rect',{x:bx-40*s,y:by-8*s,width:80*s,height:30*s,rx:8*s,fill:'#f2f1ec',stroke:'#2a2e33','stroke-width':2.5},g);
+  el('rect',{x:bx-40*s,y:by+10*s,width:80*s,height:6*s,fill:'#c9ccd1'},g);
   const j1=el('g',{},g);
-  el('rect',{x:-16*s,y:-16*s,width:L1+32*s,height:32*s,rx:16*s,class:'link'},j1);
-  el('rect',{x:L1*.35,y:-16*s,width:L1*.12,height:32*s,fill:'#e8590c'},j1);
-  el('circle',{r:17*s,class:'joint'},j1);el('circle',{r:6*s,class:'jdot'},j1);
+  el('rect',{x:0,y:-19*s,width:L1,height:38*s,rx:19*s,class:'link'},j1);
+  el('rect',{x:L1*.18,y:-19*s,width:L1*.5,height:9*s,fill:'#d9dce1'},j1);
+  el('circle',{r:28*s,fill:'#d9dce1',stroke:'#2a2e33','stroke-width':2.5},j1);el('circle',{r:13*s,class:'joint'},j1);el('circle',{r:5*s,class:'jdot'},j1);
   const j2=el('g',{},j1);
-  el('rect',{x:-13*s,y:-13*s,width:L2+26*s,height:26*s,rx:13*s,class:'link'},j2);
-  el('circle',{r:14*s,class:'joint'},j2);el('circle',{r:5*s,class:'jdot'},j2);
+  el('rect',{x:0,y:-14*s,width:L2,height:28*s,rx:14*s,class:'link'},j2);
+  el('rect',{x:L2*.72,y:-15*s,width:L2*.16,height:30*s,rx:4*s,fill:'#d9dce1',stroke:'#2a2e33','stroke-width':2},j2);
+  el('circle',{r:22*s,fill:'#d9dce1',stroke:'#2a2e33','stroke-width':2.5},j2);el('circle',{r:10*s,class:'joint'},j2);el('circle',{r:4*s,class:'jdot'},j2);
   const j3=el('g',{},j2);
   const tg=el('g',{},j3);
-  el('circle',{r:10*s,class:'joint'},j3);
+  el('circle',{r:12*s,fill:'#d9dce1',stroke:'#2a2e33','stroke-width':2},j3);el('circle',{r:5*s,class:'joint'},j3);
   const T={};for(const k in tools){T[k]=el('g',{},tg);tools[k](T[k],s,L3);T[k].style.display='none'}
   const st={x:bx,y:by-L1,rot:0,tool:null,held:null};
   function set(x,y,rot=st.rot){
@@ -428,7 +442,7 @@ scenes.cover=(svg,tok)=>{
 
 scenes.estun=(svg,tok)=>{
   svg.innerHTML='';floor(svg,420);conveyor(svg,20,780,350);
-  label(svg,24,436,'Estun 6-axis · grinding cell',{'font-size':16,fill:'#16191d','font-weight':600});
+  label(svg,24,436,'Estun 6-axis · grinding robot',{'font-size':16,fill:'#16191d','font-weight':600});
   const cnt=label(svg,776,40,'',{'text-anchor':'end','font-size':20,fill:'#16191d'});
   const arm=Arm(svg,{bx:250,by:250,L1:150,L2:140,L3:70,s:.85,tools:{grinder:TOOLS.grinder}});arm.mount('grinder');arm.set(330,190);
   const disc=arm.T.grinder.disc;
@@ -483,6 +497,7 @@ scenes.glue=(svg,tok)=>{
 
 scenes.mag=(svg,tok)=>{
   svg.innerHTML='';floor(svg,420);conveyor(svg,470,790,360);
+  const df=el('defs',{},svg);const mk2=el('marker',{id:'ah',viewBox:'0 0 10 10',refX:5,refY:5,markerWidth:6,markerHeight:6,orient:'auto-start-reverse'},df);el('path',{d:'M0 0 L10 5 L0 10z',fill:'#e8590c'},mk2);
   label(svg,24,436,'Nachi · magnet flipping before coating',{'font-size':16,fill:'#16191d','font-weight':600});
   el('rect',{x:250,y:350,width:120,height:70,fill:'#3a3f45'},svg);label(svg,310,392,'Station',{'text-anchor':'middle',fill:'#e7e5df'});
   label(svg,630,404,'To coating',{'text-anchor':'middle'});
@@ -491,11 +506,12 @@ scenes.mag=(svg,tok)=>{
   const step=steps('st-mag');let n=0;
   const mk=()=>{const g=el('g',{},svg);const inner=el('g',{},g);el('rect',{x:-32,y:-10,width:64,height:10,fill:'#d6342b'},inner);el('rect',{x:-32,y:0,width:64,height:10,fill:'#1d5fbf'},inner);
     const tN=el('text',{x:0,y:-1,'font-size':10,'text-anchor':'middle',fill:'#fff'},inner);tN.textContent='N';const tS=el('text',{x:0,y:9,'font-size':10,'text-anchor':'middle',fill:'#fff'},inner);tS.textContent='S';
-    let sy=1;return {g,inner,flip:v=>{sy=v;inner.setAttribute('transform',`scale(1,${v})`)},place:(x,y)=>g.setAttribute('transform',`translate(${x},${y+10})`)}};
+    return {g,inner,flip:v=>{inner.setAttribute('transform',`rotate(${v})`)},place:(x,y)=>g.setAttribute('transform',`translate(${x},${y+10})`)}};
   const run=async()=>{for(;;){
     const m=mk();m.place(310,330);step(0);
     await arm.move(310,260,600,tok);await arm.move(310,330,400,tok);arm.st.held=m;await arm.move(360,200,600,tok);
-    step(1);await tween(900,tok,e=>m.flip(Math.cos(e*Math.PI)));
+    step(1);const arc=el('path',{d:'M330 175 A42 42 0 1 1 392 175',fill:'none',stroke:'#e8590c','stroke-width':4,'marker-end':'url(#ah)'},svg);const at=label(svg,395,140,'Rotate 180°',{fill:'#e8590c','font-weight':700});
+    await tween(1100,tok,e=>m.flip(e*180));arc.remove();at.remove();
     step(2);await arm.move(560,270,700,tok);await arm.move(560,340,400,tok);arm.st.held=null;await arm.move(470,210,500,tok);
     n++;cnt.textContent=`Magnets flipped: ${n}`;
     tween(1200,tok,e=>{m.place(560+e*220,340);m.g.style.opacity=1-e}).then(()=>m.g.remove()).catch(()=>{});await arm.move(250,180,500,tok)}};
@@ -503,34 +519,62 @@ scenes.mag=(svg,tok)=>{
 };
 
 scenes.vis=(svg,tok)=>{
-  svg.innerHTML='';floor(svg,420);conveyor(svg,10,470,360);
-  label(svg,24,436,'Keyence camera + robot · part identification',{'font-size':16,fill:'#16191d','font-weight':600});
-  el('rect',{x:270,y:70,width:60,height:36,rx:6,fill:'#2a2e33'},svg);el('rect',{x:288,y:106,width:24,height:12,fill:'#2a2e33'},svg);label(svg,300,62,'Camera',{'text-anchor':'middle'});
-  const beam=el('path',{d:'M300 118 L250 350 L350 350Z',fill:'#1d5fbf',opacity:0},svg);
-  const tag=el('g',{opacity:0},svg);el('rect',{x:180,y:150,width:240,height:40,rx:8,fill:'#1b8a50'},tag);const tt=el('text',{x:300,y:177,'text-anchor':'middle','font-size':20,fill:'#fff','font-weight':600},tag);
-  const types=[{n:'A',c:'#e8590c',shape:'circle'},{n:'B',c:'#1d5fbf',shape:'rect'},{n:'C',c:'#1b8a50',shape:'tri'}];
-  const bx=[560,640,720];const bins=bx.map((x,i)=>{el('rect',{x:x-32,y:370,width:64,height:50,fill:'none',stroke:'#3a3f45','stroke-width':4},svg);label(svg,x,440-2,'Type '+types[i].n,{'text-anchor':'middle'});return label(svg,x,362,'0',{'text-anchor':'middle',fill:'#16191d','font-weight':700})});
-  const counts=[0,0,0];
-  const arm=Arm(svg,{bx:420,by:200,L1:165,L2:150,L3:60,s:.8,tools:{grip:TOOLS.grip}});arm.mount('grip');arm.set(500,170);
-  const step=steps('st-vis');
-  const mk=t=>{const g=el('g',{},svg);if(t.shape==='circle')el('circle',{cx:0,cy:-14,r:14,fill:t.c},g);else if(t.shape==='rect')el('rect',{x:-14,y:-28,width:28,height:28,fill:t.c},g);else el('path',{d:'M-16 0 L16 0 L0 -28Z',fill:t.c},g);
-    return {g,place:(x,y)=>g.setAttribute('transform',`translate(${x},${y+28})`)}};
+  svg.innerHTML='';floor(svg,420);
+  label(svg,24,436,'Glove line · AI vision camera + USG catcher',{'font-size':16,fill:'#16191d','font-weight':600});
+  // chain rail
+  el('rect',{x:0,y:70,width:800,height:12,fill:'#3a3f45'},svg);for(let x=10;x<800;x+=26)el('circle',{cx:x,cy:76,r:3,fill:'#8a929b'},svg);
+  // camera
+  el('rect',{x:270,y:300,width:70,height:44,rx:6,fill:'#2a2e33'},svg);el('circle',{cx:305,cy:300,r:12,fill:'#1d5fbf'},svg);el('rect',{x:298,y:344,width:14,height:76,fill:'#5b6168'},svg);
+  label(svg,305,372,'AI camera',{'text-anchor':'middle'});
+  const beam=el('path',{d:'M305 296 L262 150 L348 150Z',fill:'#1d5fbf',opacity:0},svg);
+  const tag=el('g',{opacity:0},svg);const tagR=el('rect',{x:225,y:250,width:160,height:38,rx:8,fill:'#1b8a50'},tag);const tagT=el('text',{x:305,y:276,'text-anchor':'middle','font-size':22,fill:'#fff','font-weight':700},tag);
+  // catcher (USG)
+  el('rect',{x:500,y:330,width:110,height:90,fill:'#3a3f45'},svg);label(svg,555,382,'USG catcher',{'text-anchor':'middle',fill:'#e7e5df','font-size':15});
+  const rod=el('rect',{x:549,y:250,width:12,height:80,fill:'#8a929b'},svg);const jaw=el('g',{},svg);el('rect',{x:533,y:236,width:44,height:16,rx:4,fill:'#e8590c'},jaw);
+  const bin=el('rect',{x:640,y:350,width:100,height:70,fill:'none',stroke:'#d6342b','stroke-width':4},svg);label(svg,690,345,'NG bin',{'text-anchor':'middle',fill:'#d6342b','font-weight':700});
+  const step=steps('st-vis');let gc=0,nc=0;
+  const sigG=document.getElementById('v-good'),sigN=document.getElementById('v-ng');
+  const glove=(ng)=>{const g=el('g',{},svg);
+    el('rect',{x:-4,y:0,width:8,height:16,fill:'#5b6168'},g);
+    const c=ng?'#3a5bd9':'#3a5bd9';
+    el('path',{d:'M-26 16 L26 16 L28 70 Q30 82 22 84 L22 128 Q22 136 16 136 Q10 136 10 128 L10 92 L6 92 L6 140 Q6 148 0 148 Q-6 148 -6 140 L-6 92 L-10 92 L-10 132 Q-10 140 -16 140 Q-22 140 -22 132 L-22 88 Q-34 86 -40 70 L-30 62 L-28 16Z',fill:c,stroke:'#22357f','stroke-width':2},g);
+    if(ng)el('path',{d:'M-12 24 L-4 34 L-14 40 L-6 50',stroke:'#ffb400','stroke-width':4,fill:'none'},g);
+    return g};
+  const seq=[0,0,1,0,0,1,0];
   const run=async()=>{for(let k=0;;k++){
-    const ti=[1,0,2,1,2,0][k%6],t=types[ti],p=mk(t);
-    step(0);await tween(900,tok,e=>p.place(-30+e*330,332));
-    step(1);beam.setAttribute('opacity',.18);await sleep(450,tok);tt.textContent=`Type ${t.n} · OK`;tag.setAttribute('opacity',1);beam.setAttribute('opacity',0);
-    step(2);await sleep(600,tok);
-    step(3);await tween(600,tok,e=>p.place(300+e*140,332));tag.setAttribute('opacity',0);
-    await arm.move(440,300,450,tok);await arm.move(440,334,300,tok);arm.st.held=p;await arm.move(470,240,400,tok);
-    await arm.move(bx[ti],300,600,tok);await arm.move(bx[ti],380,300,tok);arm.st.held=null;counts[ti]++;bins[ti].textContent=counts[ti];
-    p.g.style.transition='opacity .5s';p.g.style.opacity=0;setTimeout(()=>p.g.remove(),600);await arm.move(500,170,500,tok)}};
+    const ng=!!seq[k%seq.length];const g=glove(ng);let x=-60;const at=X=>{x=X;g.setAttribute('transform',`translate(${X},82)`)};
+    step(0);sigG.classList.remove('on');sigN.classList.remove('on');await tween(900,tok,e=>at(-60+e*365));
+    step(1);beam.setAttribute('opacity',.2);await sleep(500,tok);beam.setAttribute('opacity',0);
+    step(2);tagR.setAttribute('fill',ng?'#d6342b':'#1b8a50');tagT.textContent=ng?'NG · torn':'GOOD';tag.setAttribute('opacity',1);await sleep(650,tok);tag.setAttribute('opacity',0);
+    await tween(700,tok,e=>at(305+e*250));
+    if(ng){step(3);
+      await tween(350,tok,e=>{rod.setAttribute('y',250-e*30);jaw.setAttribute('transform',`translate(0,${-e*30})`)});
+      await tween(600,tok,e=>{const dy=e*170;g.setAttribute('transform',`translate(${555+e*135},${82+dy})`);rod.setAttribute('y',220+e*40);jaw.setAttribute('transform',`translate(0,${-30+e*40})`)});
+      g.style.transition='opacity .4s';g.style.opacity=0;setTimeout(()=>g.remove(),450);nc++;document.getElementById('v-nc').textContent=nc;sigN.classList.add('on');
+      await tween(300,tok,e=>{rod.setAttribute('y',260-e*10);jaw.setAttribute('transform',`translate(0,${10-e*10})`)});
+    }else{gc++;document.getElementById('v-gc').textContent=gc;sigG.classList.add('on');await tween(800,tok,e=>at(555+e*320));g.remove()}
+  }};
   return run();
+};
+
+let hmiArm=null;
+scenes.hmi=(svg,tok)=>{
+  svg.innerHTML='';floor(svg,470,520);
+  el('rect',{x:300,y:380,width:180,height:90,fill:'#3a3f45'},svg);label(svg,390,430,'Pickup jig',{'text-anchor':'middle',fill:'#e7e5df'});
+  const P=[[390,372],[390,230],[210,170]];
+  [['Taught clearance',P[1]],['Home',P[2]]].forEach(([t,[x,y]])=>{el('circle',{cx:x,cy:y,r:7,fill:'none',stroke:'#1d5fbf','stroke-width':3,'stroke-dasharray':'4 3'},svg);label(svg,x+14,y-10,t,{fill:'#1d5fbf','font-size':16})});
+  el('path',{d:`M${P[0][0]} ${P[0][1]} L${P[1][0]} ${P[1][1]} L${P[2][0]} ${P[2][1]}`,fill:'none',stroke:'#1d5fbf','stroke-width':2,'stroke-dasharray':'6 6',opacity:.5},svg);
+  const arm=Arm(svg,{bx:150,by:330,L1:180,L2:170,L3:60,s:.85,tools:{grip:TOOLS.grip}});arm.mount('grip');arm.set(...P[0]);
+  const st=label(svg,20,30,'Robot stopped at pickup jig',{'font-size':18,fill:'#16191d','font-weight':600});
+  hmiArm={go:async i=>{const t2={dead:false,timers:[]};hmiArm.t=t2;st.textContent=['Robot at pickup jig','Moving to taught clearance','Robot at HOME · ready'][i];try{await arm.move(...P[i],800,t2)}catch(e){}},
+    reset:()=>{if(hmiArm.t)hmiArm.t.dead=true;arm.set(...P[0]);st.textContent='Robot stopped at pickup jig'}};
+  return Promise.resolve();
 };
 
 /* ---------- deck ---------- */
 const stage=document.getElementById('stage'),slides=[...document.querySelectorAll('.slide')];
 const dots=document.getElementById('dots'),count=document.getElementById('count'),notes=document.getElementById('notes');
-const sceneOf={0:['cover','sc-cover'],3:['estun','sc-estun'],4:['glue','sc-glue'],5:['mag','sc-mag'],6:['vis','sc-vis']};
+const sceneOf={0:['cover',['sc-cover']],3:['estun',['sc-estun']],4:['glue',['sc-glue','sc-glue2']],5:['mag',['sc-mag']],6:['hmi',['sc-hmi']],7:['vis',['sc-vis']]};
 let cur=0,tok=null;
 dots.innerHTML=slides.map((s,i)=>`<button data-i="${i}">${i+1} ${s.dataset.title}</button>`).join('');
 const qp=new URLSearchParams(location.search);const PRES=/presenter\.html$/.test(location.pathname)||qp.get('mode')==='presenter';
@@ -546,12 +590,12 @@ const rsync=()=>{document.getElementById('rttl').textContent=slides[cur].dataset
   document.getElementById('rstat').textContent=document.getElementById('lstat').textContent||'Presenter';document.getElementById('rlive').textContent=document.getElementById('lbtn').textContent||'Start live session'};
 setInterval(rsync,700);
 function startScene(i){if(tok){tok.dead=true;tok.timers.forEach(clearTimeout)}tok={dead:false,timers:[]};const sc=sceneOf[i];if(!sc)return;
-  const svg=document.getElementById(sc[1]);if(svg.style.display==='none')return;scenes[sc[0]](svg,tok).catch(()=>{})}
+  const svg=sc[1].map(id=>document.getElementById(id)).find(e=>e&&e.getClientRects().length);if(!svg)return;scenes[sc[0]](svg,tok).catch(()=>{})}
 function show(i){i=Math.max(0,Math.min(slides.length-1,i));
   slides[cur].querySelectorAll('video').forEach(v=>v.pause());
   slides.forEach((s,k)=>s.classList.toggle('on',k===i));cur=i;
   [...dots.children].forEach((b,k)=>k===i?b.setAttribute('aria-current','step'):b.removeAttribute('aria-current'));
-  count.textContent=`${i+1} / ${slides.length}`;try{rsync()}catch(e){}notes.textContent=slides[i].dataset.notes||'';
+  count.textContent=`${i+1} / ${slides.length}`;try{rsync()}catch(e){}try{strokes=[];buildRMedia()}catch(e){}notes.textContent=slides[i].dataset.notes||'';
   slides[i].querySelectorAll('.bar i').forEach(b=>{b.style.width='0%';requestAnimationFrame(()=>requestAnimationFrame(()=>b.style.width=b.dataset.w+'%'))});
   startScene(i);try{history.replaceState(null,'',location.search+'#s'+(i+1))}catch(e){}window.livePush&&livePush()}
 dots.onclick=e=>{const b=e.target.closest('button');if(b)show(+b.dataset.i)};
@@ -563,22 +607,51 @@ addEventListener('keydown',e=>{if(window.LIVE_VIEW)return;if(['ArrowRight','Page
 const tabState={};
 function setTab(id,k,autoplay){const t=document.querySelector(`.tabs[data-for="${id}"]`),box=document.getElementById(id);if(!t||!box)return;const kids=[...box.children];if(!kids[k])return;tabState[id]=k;
   t.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.show===k));
-  kids.forEach((c,i)=>{c.hidden=false;c.style.display=i===k?'':'none';if(c.tagName==='VIDEO'){if(i===k&&autoplay)c.play().catch(()=>{});else if(i!==k)c.pause()}});
-  if(kids[k].tagName.toLowerCase()==='svg'){if(box.closest('.slide')===slides[cur])startScene(cur)}else if(tok&&box.querySelector('svg')){tok.dead=true}}
+  kids.forEach((c,i)=>{c.hidden=false;c.style.display=i===k?'':'none';const vs=c.tagName==='VIDEO'?[c]:[...c.querySelectorAll('video')];vs.forEach(v=>{if(i===k&&autoplay)v.play().catch(()=>{});else if(i!==k)v.pause()})});
+  if(kids[k].tagName.toLowerCase()==='svg'||kids[k].querySelector('svg')){if(box.closest('.slide')===slides[cur])startScene(cur)}else if(tok&&box.querySelector('svg')){tok.dead=true}}
 document.querySelectorAll('.tabs').forEach(t=>{t.onclick=e=>{if(window.LIVE_VIEW)return;const b=e.target.closest('button');if(!b)return;setTab(t.dataset.for,+b.dataset.show,true);window.livePush&&livePush()}});
 document.querySelectorAll('video').forEach((v,i)=>{v.dataset.vi=i;for(const ev of ['play','pause','seeked'])v.addEventListener(ev,()=>window.livePush&&livePush())});
 /* HMI */
 const H={b:{need:['b-plc','b-nachi'],got:[]},a:{need:['a-nachi'],got:[]}};
 let hTimers=[];
 function hRun(side){const pos=[...document.querySelectorAll('#h'+side+' span')];const s=document.getElementById('h'+side+'-s');
-  pos.forEach((p,i)=>hTimers.push(setTimeout(()=>{pos.forEach(q=>q.classList.remove('on'));p.classList.add('on');s.textContent=['Leaving pickup jig…','Moving to taught clearance…','Robot at HOME. Ready to restart.'][i]},600+i*900)))}
-function hReset(){hTimers.forEach(clearTimeout);hTimers=[];for(const k of ['a','b']){H[k].got=[];document.querySelectorAll('#h'+k+' span').forEach((p,i)=>p.classList.toggle('on',i===0));document.getElementById('h'+k+'-s').textContent='Robot stopped at pickup jig.'}}
+  pos.forEach((p,i)=>hTimers.push(setTimeout(()=>{if(hmiArm)hmiArm.go(i);pos.forEach(q=>q.classList.remove('on'));p.classList.add('on');s.textContent=['Leaving pickup jig…','Moving to taught clearance…','Robot at HOME. Ready to restart.'][i]},600+i*1100)))}
+function hReset(){hTimers.forEach(clearTimeout);hTimers=[];if(hmiArm)hmiArm.reset();for(const k of ['a','b']){H[k].got=[];document.querySelectorAll('#h'+k+' span').forEach((p,i)=>p.classList.toggle('on',i===0));document.getElementById('h'+k+'-s').textContent='Robot stopped at pickup jig.'}}
 document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{if(window.LIVE_VIEW)return;const id=b.dataset.h,side=id[0],h=H[side],s=document.getElementById('h'+side+'-s');
   const want=h.need[h.got.length];if(!want)return;
   if(id!==want){s.textContent='Press the PLC panel first.';return}
-  h.got.push(id);if(h.got.length<h.need.length){s.textContent='PLC OK. Now walk to the Nachi panel…';return}hRun(side)});
-document.getElementById('h-reset').onclick=hReset;hReset();
+  h.got.push(id);if(h.got.length<h.need.length){s.textContent='PLC OK. Now walk to the Nachi panel…';return}hRun(side);window.hmiEvt={id:Date.now(),side};window.livePush&&livePush()});
+document.getElementById('h-reset').onclick=()=>{if(window.LIVE_VIEW)return;hReset();window.hmiEvt={id:Date.now(),side:'reset'};window.livePush&&livePush()};hReset();
 const m=/^#s(\d+)$/.exec(location.hash);show(m?+m[1]-1:0);
+
+/* ---------- pointer / ink ---------- */
+const inkC=document.getElementById('ink'),ictx=inkC.getContext('2d');let strokes=[],drawing=null;
+function addStroke(pts){const c=pts.filter(p=>Array.isArray(p)&&isFinite(p[0])&&isFinite(p[1])).slice(0,200);if(c.length)strokes.push({pts:c,t:performance.now()})}
+function inkLoop(){ictx.clearRect(0,0,1600,900);const now=performance.now();strokes=strokes.filter(s=>now-s.t<5000);
+  const all=drawing?[...strokes,{pts:drawing,t:now}]:strokes;
+  for(const st of all){const age=now-st.t,a=age<3800?1:Math.max(0,1-(age-3800)/1200);ictx.globalAlpha=a;ictx.strokeStyle='#e8590c';ictx.lineWidth=10;ictx.lineCap='round';ictx.lineJoin='round';ictx.shadowColor='rgba(232,89,12,.5)';ictx.shadowBlur=12;
+    ictx.beginPath();st.pts.forEach((p,i)=>i?ictx.lineTo(p[0],p[1]):ictx.moveTo(p[0],p[1]));if(st.pts.length===1){ictx.arc(st.pts[0][0],st.pts[0][1],12,0,7)}ictx.stroke()}
+  if(drawing&&drawing.length){const p=drawing[drawing.length-1];ictx.globalAlpha=1;ictx.fillStyle='#ff3b30';ictx.beginPath();ictx.arc(p[0],p[1],14,0,7);ictx.fill()}
+  ictx.globalAlpha=1;ictx.shadowBlur=0;requestAnimationFrame(inkLoop)}
+requestAnimationFrame(inkLoop);
+const toStage=e=>{const r=inkC.getBoundingClientRect();return [Math.round((e.clientX-r.left)/r.width*1600),Math.round((e.clientY-r.top)/r.height*900)]};
+inkC.addEventListener('pointerdown',e=>{e.preventDefault();inkC.setPointerCapture(e.pointerId);drawing=[toStage(e)]});
+inkC.addEventListener('pointermove',e=>{if(drawing){e.preventDefault();drawing.push(toStage(e))}});
+const endInk=()=>{if(!drawing)return;let pts=drawing;drawing=null;const n=Math.ceil(pts.length/80);pts=pts.filter((p,i)=>i%n===0||i===pts.length-1);addStroke(pts);window.lastInk={id:Date.now(),pts};window.livePush&&livePush()};
+inkC.addEventListener('pointerup',endInk);inkC.addEventListener('pointercancel',endInk);
+const pen=document.getElementById('rpen');
+pen.onclick=()=>{const on=!document.documentElement.classList.contains('drawing');document.documentElement.classList.toggle('drawing',on);pen.textContent=on?'✏️ Pointer: ON':'✏️ Pointer: OFF'};
+document.getElementById('rclr').onclick=()=>{strokes=[];window.lastInk={id:Date.now(),pts:[[-99,-99]]};window.livePush&&livePush()};
+/* remote media controls */
+function buildRMedia(){const r=document.getElementById('rmedia');if(!r)return;const sl=slides[cur];let h='';
+  sl.querySelectorAll('.tabs').forEach(t=>t.querySelectorAll('button').forEach(b=>{h+=`<button data-f="${t.dataset.for}" data-k="${b.dataset.show}" class="${b.getAttribute('aria-pressed')==='true'?'on':''}">${b.textContent}</button>`}));
+  const v=[...sl.querySelectorAll('video')].find(x=>x.getClientRects().length);
+  if(v)h+=`<button class="pl" id="rplay">${v.paused?'▶ Play video':'❚❚ Pause video'}</button>`;
+  r.innerHTML=h}
+document.getElementById('rmedia').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.id==='rplay'){const v=[...slides[cur].querySelectorAll('video')].find(x=>x.getClientRects().length);if(v){v.muted=true;v.paused?v.play().catch(()=>{}):v.pause()}setTimeout(buildRMedia,150);return}
+  setTab(b.dataset.f,+b.dataset.k,true);window.livePush&&livePush();setTimeout(buildRMedia,50)};
+document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>setTimeout(buildRMedia,50));v.addEventListener('pause',()=>setTimeout(buildRMedia,50))});
 
 /* ---------- live presenter / viewer ---------- */
 (()=>{
@@ -588,7 +661,7 @@ const m=/^#s(\d+)$/.exec(location.hash);show(m?+m[1]-1:0);
   if(!isP&&!isV){if(location.protocol==='file:')return;const b=document.getElementById('live');b.hidden=false;b.querySelector('#lstat').innerHTML='<a href="presenter.html">Presenter</a> · <a href="viewer.html">View</a>';return}
   const box=document.getElementById('live'),stat=document.getElementById('lstat'),btn=document.getElementById('lbtn');
   const say=(t,ok)=>{stat.textContent=t;box.classList.toggle('ok',!!ok)};
-  const snap=()=>({slide:cur,tabs:{...tabState},videos:[...document.querySelectorAll('video')].map(v=>({p:!v.paused&&!v.ended,t:Math.round(v.currentTime*10)/10})),ts:Date.now()});
+  const snap=()=>({slide:cur,ink:window.lastInk||null,hmi:window.hmiEvt||null,tabs:{...tabState},videos:[...document.querySelectorAll('video')].map(v=>({p:!v.paused&&!v.ended,t:Math.round(v.currentTime*10)/10})),ts:Date.now()});
   const NTFY='https://ntfy.sh/';
   const viewerURL=(kind,id)=>{const base=location.href.split('#')[0].split('?')[0].replace(/(presenter|viewer|index)\.html$/,'');return kind==='api'?base+'viewer.html?session='+id:base+'viewer.html?topic='+id};
   if(isP){
@@ -607,7 +680,7 @@ const m=/^#s(\d+)$/.exec(location.hash);show(m?+m[1]-1:0);
     btn.onclick=async()=>{if(cred)return showQR();btn.disabled=true;say('Starting…');
       try{const r=await fetch('/api/live/sessions',{method:'POST'});if(!r.ok)throw 0;const j=await r.json();if(!/^[0-9a-f]{24}$/.test(j.session||''))throw 0;cred={kind:'api',id:j.session,key:j.key}}
       catch(e){const a=new Uint8Array(12);crypto.getRandomValues(a);cred={kind:'ntfy',id:'fais-deck-'+[...a].map(b=>b.toString(16).padStart(2,'0')).join('')}}
-      btn.disabled=false;btn.textContent='Show View QR';last='';await push();setInterval(()=>{last='';push()},5000);showQR()};
+      btn.disabled=false;btn.textContent='Show View QR';last='';await push();setInterval(()=>{last='';push()},20000);showQR()};
     return}
   if(isV){
     window.LIVE_VIEW=true;document.documentElement.classList.add('viewer');box.hidden=false;
@@ -616,6 +689,8 @@ const m=/^#s(\d+)$/.exec(location.hash);show(m?+m[1]-1:0);
     let lastTs=0;
     function apply(st){if(!st||typeof st!=='object'||typeof st.slide!=='number')return;if(st.ts&&st.ts<lastTs)return;lastTs=st.ts||lastTs;
       if(st.slide!==cur)show(st.slide);
+      if(st.hmi&&st.hmi.id&&st.hmi.id!==window.seenHmi){window.seenHmi=st.hmi.id;if(Date.now()-st.hmi.id<15000){if(st.hmi.side==='reset')hReset();else hRun(st.hmi.side)}}
+      if(st.ink&&st.ink.id&&st.ink.id!==window.seenInk&&Array.isArray(st.ink.pts)){window.seenInk=st.ink.id;if(st.ink.pts[0]&&st.ink.pts[0][0]===-99)strokes=[];else if(Date.now()-st.ink.id<15000)addStroke(st.ink.pts)}
       for(const id in (st.tabs||{}))if(tabState[id]!==st.tabs[id])setTab(id,+st.tabs[id],false);
       const vs=[...document.querySelectorAll('video')];(st.videos||[]).forEach((x,i)=>{const v=vs[i];if(!v||!x)return;
         if(Math.abs(v.currentTime-x.t)>1.5)try{v.currentTime=x.t}catch(e){}
