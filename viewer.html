@@ -60,13 +60,18 @@ ul.pts{margin:0;padding-left:22px}ul.pts li{margin:4px 0}
 .stats .card{padding:16px 20px}
 /* timeline */
 .tl{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;margin-top:40px;flex:1}
-.tl:before{content:"";position:absolute;left:0;right:0;top:34px;height:6px;background:linear-gradient(90deg,var(--steel),var(--or) 45%,var(--bl));border-radius:3px}
-.tl .card{margin-top:70px;position:relative;padding:18px}
-.tl .card:before{content:"";position:absolute;top:-46px;left:22px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:6px solid var(--or)}
+.tl:before{content:"";position:absolute;left:0;right:0;top:24px;height:6px;background:linear-gradient(90deg,var(--steel),var(--or) 45%,var(--bl));border-radius:3px}
+.tl .card{margin-top:58px;position:relative;padding:18px}
+.tl .card:before{content:"";position:absolute;top:-45px;left:22px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:6px solid var(--or)}
 .tl .yr{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:26px;font-weight:700;color:var(--or)}
 .tl h3{font-size:27px;margin:4px 0 6px}
 .tl p{margin:0;font-size:19px;color:var(--mute)}
 .tl .now:before{border-color:var(--bl)}
+.eh{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;font-size:26px;color:var(--mute)}
+.edu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch;margin-top:8px}
+.edu .card{padding:12px 16px;display:flex;flex-direction:column;gap:2px;font-size:19px}.edu .card span{color:var(--mute);font-size:17px}
+.edu .yr{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;font-size:22px;color:var(--steel)}
+.edu .hl{border:2px solid var(--or)}.edu .hl .yr{color:var(--or)}
 .tl .now .yr{color:var(--bl)}
 /* flow */
 .flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
@@ -160,12 +165,18 @@ html.remote #remote{display:block;position:static;padding:12px 14px 60px;color:#
 <!-- 2 JOURNEY -->
 <section class="slide" data-title="Journey" data-notes="My interest in robots started as a student: in 2018 our humanoid robot won 1st place at FIRA RoboWorld Cup in Taiwan. Then I worked as a Robotic Engineer at DFS building Nachi and Estun robots, moved to Kossan for production machines and vision, and now I work on machine vision for lithium battery lines at Linergy.">
   <div class="kick">My path</div>
-  <h2>Robots since 2018 – from competition to production lines</h2>
-  <div class="tl">
-    <div class="card"><div class="yr">2018</div><h3>FIRA RoboWorld Cup, Taiwan</h3><p>1st place, HuroCup Marathon. Humanoid robot with OpenCV vision. Also Gold, FIRA Malaysia Cup and iCompEx.</p></div>
-    <div class="card"><div class="yr">2022 – 2023</div><h3>BEng Electrical, UniMAP · Kozato Kizai</h3><p>R&amp;D technician: feasibility studies, process and packaging improvement.</p></div>
-    <div class="card"><div class="yr">2023 – 2024</div><h3>Robotic Engineer · DFS Engineering</h3><p>Nachi and Estun robots: offline simulation, teaching, robot–PLC, Keyence vision, commissioning.</p></div>
-    <div class="card"><div class="yr">2024 – 2026</div><h3>Backend Automation &amp; Maintenance · Kossan</h3><p>Glove line automation, AI vision, PM, IQ/OQ/PQ, SOP/WI/OPL.</p></div>
+  <h2>Robots since 2018 – competition to production lines</h2>
+  <div class="eh" style="margin-top:20px">Education &amp; achievements</div>
+  <div class="edu">
+    <div class="card"><div class="yr">2015 – 2018</div><b>Diploma Electrical Eng.</b><span>Politeknik Sultan Azlan Shah</span></div>
+    <div class="card hl"><div class="yr">2018</div><b>1st place · FIRA RoboWorld Cup, Taiwan</b><span>Humanoid robot + OpenCV · also Gold FIRA Malaysia Cup, iCompEx</span></div>
+    <div class="card"><div class="yr">2018 – 2022</div><b>BEng (Hons) Electrical Eng.</b><span>Universiti Malaysia Perlis (UniMAP)</span></div>
+  </div>
+  <div class="eh" style="margin-top:18px">Career</div>
+  <div class="tl" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-top:0">
+    <div class="card"><div class="yr">Nov 2022 – Feb 2023</div><h3>R&amp;D Technician · Kozato Kizai</h3><p>Feasibility studies, process and packaging improvement.</p></div>
+    <div class="card"><div class="yr">Feb 2023 – Oct 2024</div><h3>Robotic Engineer · DFS Engineering</h3><p>Nachi and Estun robots: offline simulation, teaching, robot–PLC, Keyence vision, commissioning.</p></div>
+    <div class="card"><div class="yr">Oct 2024 – Oct 2026</div><h3>Backend Automation &amp; Maintenance · Kossan</h3><p>Glove line automation, AI vision, PM, IQ/OQ/PQ, SOP/WI/OPL.</p></div>
     <div class="card now"><div class="yr">Oct 2026 – now</div><h3>Machine Vision Engineer II · Linergy Power</h3><p>Vision for lithium battery: line-scan, winding and welding inspection.</p></div>
   </div>
   <div class="kaizen" style="margin-top:26px"><span>Robot</span><em>+</em><span>PLC</span><em>+</em><span>Vision</span><em>=</em><span style="background:var(--or)">Stable automated production</span></div>
