@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fais · Robotics Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calm, factual engineering review for a senior Japanese manager; few words, big numbers, things moving.
+   IDEA: a robot cell commissioning board: each slide is a cell under test, with a live process simulation.
+   PICTURE: SVG robot arms running each real process step by step, beside real factory footage.
+   COLOUR and TYPE: concrete white floor, graphite ink, robot orange for motion, signal green for OK, steel blue for PLC/vision. Barlow + Barlow Condensed.
+   LAYOUT: fixed 16:9 stage scaled to the screen; title top-left, simulation large, facts in a narrow right column. */
+:root{color-scheme:light;--bg:#f3f2ee;--panel:#ffffff;--ink:#16191d;--mute:#5d636b;--line:#d9d7cf;--or:#e8590c;--orl:#fde3d3;--gr:#1b8a50;--grl:#d9f2e3;--bl:#1d5fbf;--bll:#dce8fa;--steel:#8a929b}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0;height:100%;background:#22262b;overflow:hidden}
+body{font:24px/1.4 Barlow,system-ui,sans-serif;color:var(--ink)}
+#wrap{position:fixed;inset:0;display:grid;place-items:center}
+#stage{width:1600px;height:900px;position:relative;transform-origin:center;background:var(--bg);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.slide{position:absolute;inset:0;padding:56px 72px 96px;display:none;flex-direction:column}
+.slide.on{display:flex;animation:in .45s ease both}
+@keyframes in{from{opacity:0;transform:translateY(12px)}}
+h1,h2,h3{font-family:"Barlow Condensed",sans-serif;margin:0;line-height:1.04;font-weight:700}
+h1{font-size:96px}h2{font-size:58px;text-wrap:balance}h3{font-size:30px;font-weight:600}
+.kick{font-size:22px;color:var(--or);font-weight:700;margin-bottom:6px}
+.sub{color:var(--mute);font-size:24px;margin-top:8px}
+.row{display:flex;gap:32px;flex:1;margin-top:28px;min-height:0}
+.main{flex:1.55;display:flex;flex-direction:column;min-height:0}
+.side{flex:1;display:flex;flex-direction:column;gap:16px;min-height:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+.big{white-space:nowrap;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;font-size:60px;line-height:1}
+.big small{font-size:28px;color:var(--mute);font-weight:600}
+.lbl{font-size:20px;color:var(--mute)}
+ul.pts{margin:0;padding-left:22px}ul.pts li{margin:4px 0}
+.media{position:relative;flex:1;background:#101317;border-radius:14px;overflow:hidden;min-height:0}
+.media>*{position:absolute;inset:0;width:100%;height:100%}
+.media img,.media video{object-fit:contain;background:#101317}
+.media svg.sim{background:#fbfaf7}
+.tabs{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.tabs button{font:600 17px Barlow;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 13px;border-radius:999px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.steps{display:flex;gap:6px;margin-top:10px}
+.steps span{flex:1;font-size:18px;padding:8px 10px;border-radius:8px;background:#e7e5df;color:var(--mute);transition:.25s}
+.steps span.on{background:var(--or);color:#fff}
+.steps span.done{background:var(--orl);color:var(--ink)}
+.bar{height:34px;border-radius:6px;background:#e7e5df;position:relative;overflow:hidden;margin:4px 0 10px}
+.bar i{min-width:96px;position:absolute;inset:0 auto 0 0;background:var(--steel);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;color:#fff;font-style:normal;font-weight:700;font-size:20px;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+.bar i.or{background:var(--or)}
+.sig{display:flex;align-items:center;gap:12px;font-size:19px;padding:5px 0}
+.sig b{width:16px;height:16px;border-radius:50%;background:#cfcdc6;flex:none;transition:.2s}
+.sig.on b{background:var(--gr);box-shadow:0 0 0 5px var(--grl)}
+.chip{display:inline-block;font-size:18px;font-weight:600;padding:3px 12px;border-radius:999px;background:var(--bll);color:var(--bl);margin:2px 4px 2px 0}
+.chip.o{background:var(--orl);color:#a23c05}.chip.g{background:var(--grl);color:var(--gr)}
+.note{font-size:17px;color:var(--mute)}
+.ba{display:flex;align-items:baseline;gap:14px}.ba .big,.ba .arrow{flex:none}.ba .lbl{flex:1}.ba .arrow{font-size:40px;color:var(--or);font-weight:700}
+/* cover */
+.cover{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;flex:1;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:34px}
+.stats .card{padding:16px 20px}
+/* timeline */
+.tl{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;margin-top:40px;flex:1}
+.tl:before{content:"";position:absolute;left:0;right:0;top:34px;height:6px;background:linear-gradient(90deg,var(--steel),var(--or) 45%,var(--bl));border-radius:3px}
+.tl .card{margin-top:70px;position:relative;padding:18px}
+.tl .card:before{content:"";position:absolute;top:-46px;left:22px;width:22px;height:22px;border-radius:50%;background:var(--bg);border:6px solid var(--or)}
+.tl .yr{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:26px;font-weight:700;color:var(--or)}
+.tl h3{font-size:27px;margin:4px 0 6px}
+.tl p{margin:0;font-size:19px;color:var(--mute)}
+.tl .now:before{border-color:var(--bl)}
+.tl .now .yr{color:var(--bl)}
+/* flow */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.flow .card{padding:16px;border-top:6px solid var(--or)}
+.flow .n{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;font-size:40px;color:var(--or);line-height:1}
+.flow h3{font-size:26px;margin:4px 0}
+.flow p{margin:0;font-size:18px;color:var(--mute)}
+/* hmi */
+.hmi{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.pnl{display:flex;gap:10px;margin:10px 0}
+.pnl button{flex:1;font:700 21px Barlow;padding:16px 8px;border-radius:10px;border:2px solid var(--ink);background:#fff;cursor:pointer}
+.pnl button.nachi{border-color:var(--or);color:#a23c05}
+.pos{display:flex;gap:6px}.pos span{flex:1;text-align:center;font-size:17px;padding:6px;border-radius:6px;background:#e7e5df;color:var(--mute);transition:.25s}
+.pos span.on{background:var(--gr);color:#fff}
+.stat{font-size:19px;min-height:28px;margin-top:8px;color:var(--mute)}
+/* gloves */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pair figure{margin:0;background:#101317;border-radius:10px;overflow:hidden}
+.pair img{width:100%;height:104px;object-fit:cover;display:block}
+.pair figcaption{color:#fff;font-size:17px;padding:6px 10px}
+/* close */
+.bring{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:30px}
+.bring .card{border-top:6px solid var(--bl)}
+.bring h3{margin-bottom:8px}
+.bring p{margin:0;font-size:20px;color:var(--mute)}
+.kaizen{display:flex;gap:10px;margin-top:22px;align-items:center;flex-wrap:wrap}
+.kaizen span{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:28px;font-weight:600;padding:8px 18px;border-radius:10px;background:var(--ink);color:#fff}
+.kaizen em{color:var(--or);font-style:normal;font-size:28px;font-weight:700}
+/* chrome */
+#nav{position:absolute;left:0;right:0;bottom:0;height:64px;display:flex;align-items:center;gap:14px;padding:0 72px;border-top:1px solid var(--line);background:var(--bg);z-index:5}
+#nav button{font:600 19px Barlow;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 16px;cursor:pointer;color:var(--ink)}
+#dots{display:flex;gap:6px;flex:1}
+#dots button{padding:6px 10px;font-size:16px}
+#dots button[aria-current=step]{background:var(--ink);color:#fff;border-color:var(--ink)}
+#count{font-size:19px;color:var(--mute);min-width:60px;text-align:right}
+#notes{position:absolute;left:72px;right:72px;bottom:76px;background:#16191d;color:#f3f2ee;border-radius:12px;padding:16px 22px;font-size:20px;display:none;z-index:6;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+#notes.on{display:block}
+button:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+svg text{font-family:Barlow,sans-serif}
+.link{fill:#eceae4;stroke:#2a2e33;stroke-width:2.5}
+.joint{fill:#2a2e33}.jdot{fill:var(--or)}
+#live{position:absolute;top:14px;right:20px;z-index:8;display:flex;gap:8px;align-items:center;font-size:16px;color:var(--mute)}
+#live button{font:600 16px Barlow;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;color:var(--ink)}
+#live .dot{width:10px;height:10px;border-radius:50%;background:#cfcdc6}#live.ok .dot{background:var(--gr)}
+#qr{position:fixed;inset:0;background:rgba(10,12,14,.82);display:none;place-items:center;z-index:20}
+#qr.on{display:grid}#qr .box{background:#fff;border-radius:16px;padding:28px;text-align:center;max-width:92vw;font:18px Barlow}
+#qr #qrc{display:grid;place-items:center;min-height:260px;margin:12px 0}#qr #qrc img,#qr #qrc canvas{width:260px;height:260px}
+#qr a{word-break:break-all;color:var(--bl)}#qr button{font:600 17px Barlow;padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:#f3f2ee;cursor:pointer;margin-top:10px}
+html.viewer #nav button,html.viewer #nbtn{display:none}html.viewer #stage .slide{pointer-events:none}html.viewer #count{margin-left:auto}
+@media (prefers-reduced-motion:reduce){.slide.on{animation:none}}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+
+<!-- 1 COVER -->
+<section class="slide" data-title="Profile" data-notes="Good morning. I am Fais, an Automation and Robotics Engineer with more than four years in robot cells, machine vision and production support. Today I will show the robot projects I built, with simulation and real footage, and what I can bring to PAPAMY.">
+  <div class="cover">
+    <div>
+      <div class="kick">Final interview · Production Engineering – Executive</div>
+      <h1>Muhamad Nurul Fais</h1>
+      <div class="sub" style="font-size:30px;color:var(--ink);font-weight:600">Automation &amp; Robotics Engineer · 4+ years</div>
+      <div class="sub">Robot programming · Offline simulation · Robot–PLC integration · Machine vision</div>
+      <div class="stats">
+        <div class="card"><div class="big">8×</div><div class="lbl">Output with Estun grinding robot<br>10,000 → 80,000 pcs/day</div></div>
+        <div class="card"><div class="big">−42%</div><div class="lbl">Inspection cycle time with vision part ID<br>2:00 → 1:10</div></div>
+        <div class="card"><div class="big">RM1.6M</div><div class="lbl">Robot cells delivered at DFS<br>Estun · Nachi × 2</div></div>
+        <div class="card"><div class="big" style="font-size:50px">~1.0→0.5%</div><div class="lbl">Defect rate after AI vision inspection (Kossan)</div></div>
+      </div>
+    </div>
+    <div class="media" style="height:640px;flex:none"><svg class="sim" id="sc-cover" viewBox="0 0 800 640" role="img" aria-label="Animated robot arm doing pick and place"></svg></div>
+  </div>
+</section>
+
+<!-- 2 JOURNEY -->
+<section class="slide" data-title="Journey" data-notes="My interest in robots started as a student: in 2018 our humanoid robot won 1st place at FIRA RoboWorld Cup in Taiwan. Then I worked as a Robotic Engineer at DFS building Nachi and Estun cells, moved to Kossan for production machines and vision, and now I work on machine vision for lithium battery lines at Linergy.">
+  <div class="kick">My path</div>
+  <h2>Robots since 2018 – from competition to production lines</h2>
+  <div class="tl">
+    <div class="card"><div class="yr">2018</div><h3>FIRA RoboWorld Cup, Taiwan</h3><p>1st place, HuroCup Marathon. Humanoid robot with OpenCV vision. Also Gold, FIRA Malaysia Cup and iCompEx.</p></div>
+    <div class="card"><div class="yr">2022 – 2023</div><h3>BEng Electrical, UniMAP · Kozato Kizai</h3><p>R&amp;D technician: feasibility studies, process and packaging improvement.</p></div>
+    <div class="card"><div class="yr">2023 – 2024</div><h3>Robotic Engineer · DFS Engineering</h3><p>Nachi and Estun robot cells: offline simulation, teaching, robot–PLC, Keyence vision, commissioning.</p></div>
+    <div class="card"><div class="yr">2024 – 2026</div><h3>Backend Automation &amp; Maintenance · Kossan</h3><p>Glove line automation, AI vision, PM, IQ/OQ/PQ, SOP/WI/OPL.</p></div>
+    <div class="card now"><div class="yr">Oct 2026 – now</div><h3>Machine Vision Engineer II · Linergy Power</h3><p>Vision for lithium battery: line-scan, winding and welding inspection.</p></div>
+  </div>
+  <div class="kaizen" style="margin-top:26px"><span>Robot</span><em>+</em><span>PLC</span><em>+</em><span>Vision</span><em>=</em><span style="background:var(--or)">Stable automated production</span></div>
+</section>
+
+<!-- 3 HOW I BUILD -->
+<section class="slide" data-title="Method" data-notes="This is how I build every robot cell. I simulate first in Nachi FD on Desk, so reach, cycle time and collisions are checked before the machine arrives. Then teach on site, integrate with the PLC and vision, test full cycles, and finally hand over with SOP and OPL so operators can run it.">
+  <div class="kick">How I build a robot cell</div>
+  <h2>Simulate first, then teach, integrate and hand over</h2>
+  <div class="row">
+    <div class="main"><div class="media"><img src="media/fd_sim.jpg" alt="Nachi FD on Desk offline simulation of the hot glue cell, MZ07L robot, glue position program"></div>
+      <div class="note" style="margin-top:8px">Real offline simulation · Nachi FD on Desk · Hot Glue cell, MZ07L robot, June 2023</div></div>
+    <div class="side">
+      <div class="flow" style="grid-template-columns:1fr">
+        <div class="card"><div class="n">1</div><h3>Offline simulation</h3><p>Check reach, path, collision and cycle time before the cell is built.</p></div>
+        <div class="card"><div class="n">2</div><h3>Teach on site</h3><p>Teach pendant: positions, tool change, speeds.</p></div>
+        <div class="card"><div class="n">3</div><h3>Integrate</h3><p>Robot ↔ PLC handshake, Keyence vision, HMI.</p></div>
+        <div class="card"><div class="n">4</div><h3>Full cycle test → handover</h3><p>Tune cycle time, then SOP / WI / OPL for operators.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 ESTUN -->
+<section class="slide" data-title="Estun" data-notes="Estun grinding, RM700K. A 6-axis Estun robot grinds the edges of steel piling components. Before, grinding was manual. After automation, output went from 10,000 to 80,000 pieces per day and we reduced the dependency on manual labour.">
+  <div class="kick">DFS Engineering · 2023 · RM700K</div>
+  <h2>Estun grinding robot – 8× output</h2>
+  <div class="row">
+    <div class="main"><div class="media"><svg class="sim" id="sc-estun" viewBox="0 0 800 440" role="img" aria-label="Simulation: robot grinds burr on steel part on conveyor"></svg></div>
+      <div class="steps" id="st-estun"><span>1 · Part in</span><span>2 · Grind edge</span><span>3 · Part out</span></div></div>
+    <div class="side">
+      <div class="card"><div class="lbl">Output per day</div>
+        <div style="font-size:19px;margin-top:8px">Manual grinding</div><div class="bar"><i data-w="12.5">10,000</i></div>
+        <div style="font-size:19px">Estun robot cell</div><div class="bar"><i class="or" data-w="100">80,000</i></div></div>
+      <div class="card"><h3>My role</h3><ul class="pts"><li>6-axis Estun robot for grinding steel piling components</li><li>Grinding path teaching and tuning</li><li>Less manual labour, consistent finish</li></ul></div>
+      <div class="note">Animation is a simplified process illustration.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 HOT GLUE -->
+<section class="slide" data-title="Hot Glue" data-notes="Hot glue and cutting, RM500K. One Nachi robot does two processes with automatic tool change: glue gun, then knife. The jig press already had a PLC, so I used it to talk directly to the Nachi internal PLC – no second external PLC needed, lower cost. Show the simulation, then the real tool change and the full cycle test. Result: 24-hour production with less manpower.">
+  <div class="kick">DFS Engineering · 2023 · RM500K</div>
+  <h2>Hot glue &amp; cutting – two processes, one robot</h2>
+  <div class="row">
+    <div class="main">
+      <div class="tabs" data-for="m-glue">
+        <button aria-pressed="true" data-show="0">Process simulation</button>
+        <button data-show="1">FD on Desk</button>
+        <button data-show="2">Glue trial</button>
+        <button data-show="3">Glue on product</button>
+        <button data-show="4">Real tool change</button>
+        <button data-show="5">Full cycle test</button>
+      </div>
+      <div class="media" id="m-glue">
+        <svg class="sim" id="sc-glue" viewBox="0 0 800 440" role="img" aria-label="Simulation: robot changes between glue gun and knife, glues and cuts part"></svg>
+        <img src="media/fd_sim.jpg" alt="FD on Desk simulation of hot glue cell" hidden>
+        <video src="media/glue_trial.mp4" poster="media/glue_trial_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
+        <video src="media/glue_product.mp4" poster="media/glue_product_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
+        <video src="media/toolchange.mp4" poster="media/toolchange_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
+        <video src="media/hotglue_fulltest.mp4" poster="media/hotglue_fulltest_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
+      </div>
+      <div class="steps" id="st-glue"><span>1 · Clamp</span><span>2 · Take glue gun</span><span>3 · Glue</span><span>4 · Change to knife</span><span>5 · Cut</span><span>6 · Release</span></div>
+    </div>
+    <div class="side">
+      <div class="card"><h3>Robot ↔ Jig PLC signals</h3>
+        <div class="sig" id="g-s0"><b></b>Jig PLC → Robot: part clamped</div>
+        <div class="sig" id="g-s1"><b></b>Robot: tool change OK</div>
+        <div class="sig" id="g-s2"><b></b>Robot → Jig PLC: cycle complete</div>
+        <div class="sig" id="g-s3"><b></b>Jig PLC: press release</div></div>
+      <div class="card"><h3>Design decision</h3><div style="font-size:20px">Reuse the existing jig press PLC with the <b>Nachi internal PLC</b> – no extra external PLC.</div></div>
+      <div class="card"><div class="ba"><div class="big">24 h</div><div class="lbl">production, less manpower, consistent glue and cut</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 MAGNET -->
+<section class="slide" data-title="Magnet" data-notes="Magnet flipping, RM400K. Before, operators flipped every magnet by hand before coating – repetitive and a safety risk. The Nachi robot picks, flips 180 degrees and places on the coating line. Control uses only the Nachi internal PLC, no external PLC.">
+  <div class="kick">DFS Engineering · 2023 · RM400K</div>
+  <h2>Magnet flipping – manual handling removed</h2>
+  <div class="row">
+    <div class="main">
+      <div class="tabs" data-for="m-mag"><button aria-pressed="true" data-show="0">Process simulation</button><button data-show="1">Real cell</button></div>
+      <div class="media" id="m-mag">
+        <svg class="sim" id="sc-mag" viewBox="0 0 800 440" role="img" aria-label="Simulation: robot picks magnet, flips it and places it on coating line"></svg>
+        <video src="media/magnet.mp4" poster="media/magnet_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
+      </div>
+      <div class="steps" id="st-mag"><span>1 · Pick at station</span><span>2 · Flip 180°</span><span>3 · Place on coating line</span></div>
+    </div>
+    <div class="side">
+      <div class="card"><h3>Before → After</h3><div style="font-size:20px">Operator flips each magnet by hand <span style="color:var(--or);font-weight:700">→</span> robot flips every magnet, same way, every cycle.</div></div>
+      <div class="card"><h3>My role</h3><ul class="pts"><li>Nachi robot program and taught positions</li><li>Cell control with Nachi internal PLC only</li><li>Operator recovery workflow on the pendant HMI</li></ul></div>
+      <div class="card"><span class="chip g">Safety</span><span class="chip g">Consistency</span><span class="chip g">Less repetitive work</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 VISION PART ID -->
+<section class="slide" data-title="Vision ID" data-notes="Keyence vision for part identification at DFS. The camera identifies the part type and the robot selects the right program automatically. Inspection cycle time went from 2 minutes to 1 minute 10 seconds, and manual inspection errors were eliminated.">
+  <div class="kick">DFS Engineering · Keyence vision + robot</div>
+  <h2>Vision tells the robot which part – 2:00 → 1:10</h2>
+  <div class="row">
+    <div class="main"><div class="media"><svg class="sim" id="sc-vis" viewBox="0 0 800 440" role="img" aria-label="Simulation: camera identifies part type, robot sorts it to the right bin"></svg></div>
+      <div class="steps" id="st-vis"><span>1 · Part arrives</span><span>2 · Camera identifies</span><span>3 · PLC sends type to robot</span><span>4 · Robot picks &amp; sorts</span></div></div>
+    <div class="side">
+      <div class="card"><div class="lbl">Inspection cycle time</div>
+        <div style="font-size:19px;margin-top:8px">Manual check</div><div class="bar"><i data-w="100">2 min 00 s</i></div>
+        <div style="font-size:19px">Vision part ID</div><div class="bar"><i class="or" data-w="58">1 min 10 s</i></div>
+        <div class="big" style="color:var(--or)">−42%</div></div>
+      <div class="card"><h3>How it works</h3><div style="font-size:20px">Keyence result (string) → PLC → converted to a number the robot uses to select the program.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 HMI -->
+<section class="slide" data-title="HMI" data-notes="A small kaizen from the shop floor. After a stop, operators had to press two panels – PLC first, then Nachi – to recover the robot. I moved the recovery into the Nachi pendant HMI with taught positions before homing. Now one panel, and restart time dropped from about 3 to 4 minutes to 1 to 2 minutes. These are estimates from shop-floor observation.">
+  <div class="kick">Operator-focused kaizen</div>
+  <h2>Robot recovery – from 2 panels to 1</h2>
+  <div class="row">
+    <div class="main">
+      <div class="hmi">
+        <div class="card"><h3>Before · 2 panels</h3>
+          <div class="pnl"><button data-h="b-plc">1 · PLC panel HOME</button><button class="nachi" data-h="b-nachi">2 · Nachi panel HOME</button></div>
+          <div class="pos" id="hb"><span>Pickup jig</span><span>Taught clearance</span><span>Home</span></div>
+          <div class="stat" id="hb-s">Robot stopped at pickup jig.</div></div>
+        <div class="card"><h3>After · 1 panel</h3>
+          <div class="pnl"><button class="nachi" data-h="a-nachi">Nachi panel HOME</button></div>
+          <div class="pos" id="ha"><span>Pickup jig</span><span>Taught clearance</span><span>Home</span></div>
+          <div class="stat" id="ha-s">Robot stopped at pickup jig.</div></div>
+      </div>
+      <div class="card" style="margin-top:16px;display:flex;align-items:center;gap:30px">
+        <div class="ba" style="flex:none"><div class="big" style="color:var(--steel);font-size:52px">3–4 min</div><div class="arrow">→</div><div class="big" style="color:var(--or);font-size:52px">1–2 min</div></div>
+        <div class="lbl">Estimated restart time after a stop (shop-floor observation)</div>
+        <button id="h-reset" style="margin-left:auto;font:600 19px Barlow;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer">Reset</button>
+      </div>
+    </div>
+    <div class="side">
+      <div class="tabs" data-for="m-hmi"><button aria-pressed="true" data-show="0">HMI photo</button><button data-show="1">HMI in use</button></div>
+      <div class="media" id="m-hmi">
+        <img src="media/hmi_photo.jpg" alt="Nachi teach pendant HMI with GO HOME button">
+        <video src="media/hmi_video.mp4" poster="media/hmi_video_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 VISION ON LINE -->
+<section class="slide" data-title="Vision line" data-notes="At Kossan I worked on production lines in operation. AI vision reduced the defect rate from about 1.0 to 0.5 percent. One example: the AI flagged folded cuffs as tears. By comparing images I found two different conditions; after sensitivity tuning with the PEM vision team, recorded rejects dropped from 99 to 47 per hour in a one-hour check, with follow-up across shifts planned. I also built the USG system that removes defective gloves automatically. Now at Linergy I do the same vision work for lithium battery lines.">
+  <div class="kick">Kossan 2024–2026 · Linergy now</div>
+  <h2>Vision and automation on running lines</h2>
+  <div class="row">
+    <div class="main">
+      <div class="tabs" data-for="m-ks"><button aria-pressed="true" data-show="0">Production line clip</button><button data-show="1">USG machine</button><button data-show="2">USG in operation</button></div>
+      <div class="media" id="m-ks">
+        <video src="media/line_clip.mp4" poster="media/line_clip_poster.jpg" controls muted playsinline preload="metadata"></video>
+        <img src="media/usg_jpg.jpg" alt="Installed USG machine on glove line" hidden>
+        <video src="media/usg_mp4.mp4" poster="media/usg_mp4_poster.jpg" controls muted playsinline preload="metadata" hidden></video>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card" style="padding:12px 20px"><div class="big" style="font-size:50px">~1.0 → 0.5%</div><div class="lbl">Defect rate after AI vision inspection</div></div>
+      <div class="card" style="padding:12px 20px"><h3 style="font-size:26px">Root cause: real tear vs folded cuff</h3>
+        <div class="pair" style="margin-top:8px"><figure><img src="media/tear.jpg" alt="Glove with real tear"><figcaption>Real reject · tear</figcaption></figure><figure><img src="media/fold.jpg" alt="Glove with folded cuff"><figcaption>Over-reject · fold</figcaption></figure></div>
+        <div class="ba" style="margin-top:10px"><div class="big" style="font-size:42px">99 → 47</div><div class="lbl">rejects/hr after tuning (1-hr check, with PEM Vision Team)</div></div></div>
+      <div class="card" style="padding:14px 20px"><span class="chip o">USG 2025</span> automatic defect removal, less double dipping<br><span class="chip">Linergy</span> line-scan vision for battery winding &amp; welding</div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 CLOSE -->
+<section class="slide" data-title="For PAPAMY" data-notes="What I bring: I can build and debug robot cells from simulation to handover; I connect robot, PLC and vision; and I improve the line with operators, using data and root cause. I follow genba, check data, find root cause, standardise and train. Thank you – arigatou gozaimasu. I am happy to answer questions.">
+  <div class="kick">What I bring to PAPAMY</div>
+  <h2>Ready to build and improve robot cells on your lines</h2>
+  <div class="bring">
+    <div class="card"><h3>Robot cells, end to end</h3><p>Offline simulation, teaching, tool change, commissioning and cycle-time tuning (Nachi, Estun).</p></div>
+    <div class="card"><h3>Robot + PLC + vision</h3><p>Robot–PLC handshake, Omron PLC, Keyence and AI vision, HMI for operators.</p></div>
+    <div class="card"><h3>Stable production</h3><p>Troubleshooting, PM, IQ/OQ/PQ, SOP/WI/OPL and training new engineers.</p></div>
+  </div>
+  <div class="kaizen"><span>Genba</span><em>→</em><span>Data</span><em>→</em><span>Root cause</span><em>→</em><span>Standardise</span><em>→</em><span>Train</span></div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:space-between;gap:30px">
+    <div><h1 style="font-size:84px">Thank you</h1><div class="sub" style="font-size:34px">ありがとうございます</div></div>
+    <div class="lbl" style="text-align:right">Muhamad Nurul Fais<br>nurulfais.ismadi@gmail.com · +60 19-447 6327</div>
+  </div>
+</section>
+
+<div id="notes"></div>
+<div id="live" hidden><span class="dot"></span><span id="lstat"></span><button id="lbtn" hidden></button></div>
+<nav id="nav"><button id="prev" aria-label="Previous slide">← Back</button><div id="dots"></div><span id="count"></span><button id="nbtn" title="Speaker notes (N)">Notes</button><button id="fs" title="Full screen (F)">Full screen</button><button id="next" aria-label="Next slide">Next →</button></nav>
+</div></div>
+<div id="qr" role="dialog" aria-label="Scan to follow"><div class="box"><b style="font-size:22px">Scan to follow this presentation</b><div id="qrc"></div><a id="qrl" target="_blank"></a><br><button id="qrx">Close</button></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+{
+const NS='http://www.w3.org/2000/svg';
+const el=(tag,attrs={},parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e};
+const sleep=(ms,tok)=>new Promise((res,rej)=>{const t=setTimeout(()=>tok.dead?rej('stop'):res(),ms);tok.timers.push(t)});
+const ease=t=>t<.5?2*t*t:1-(-2*t+2)**2/2;
+const tween=(ms,tok,fn)=>new Promise((res,rej)=>{const t0=performance.now();const step=now=>{if(tok.dead)return rej('stop');const p=Math.min(1,(now-t0)/ms);fn(ease(p),p);p<1?requestAnimationFrame(step):res()};requestAnimationFrame(step)});
+
+/* ---------- robot arm with simple 2-link IK, tool always pointing down ---------- */
+function Arm(svg,{bx,by,L1,L2,L3,s=1,tools}){
+  const g=el('g',{},svg);
+  el('path',{d:`M${bx-40*s} ${by+70*s} L${bx-26*s} ${by} L${bx+26*s} ${by} L${bx+40*s} ${by+70*s}Z`,fill:'#3a3f45'},g);
+  el('rect',{x:bx-34*s,y:by-16*s,width:68*s,height:22*s,rx:6,fill:'#eceae4',stroke:'#2a2e33','stroke-width':2.5},g);
+  const j1=el('g',{},g);
+  el('rect',{x:-16*s,y:-16*s,width:L1+32*s,height:32*s,rx:16*s,class:'link'},j1);
+  el('rect',{x:L1*.35,y:-16*s,width:L1*.12,height:32*s,fill:'#e8590c'},j1);
+  el('circle',{r:17*s,class:'joint'},j1);el('circle',{r:6*s,class:'jdot'},j1);
+  const j2=el('g',{},j1);
+  el('rect',{x:-13*s,y:-13*s,width:L2+26*s,height:26*s,rx:13*s,class:'link'},j2);
+  el('circle',{r:14*s,class:'joint'},j2);el('circle',{r:5*s,class:'jdot'},j2);
+  const j3=el('g',{},j2);
+  const tg=el('g',{},j3);
+  el('circle',{r:10*s,class:'joint'},j3);
+  const T={};for(const k in tools){T[k]=el('g',{},tg);tools[k](T[k],s,L3);T[k].style.display='none'}
+  const st={x:bx,y:by-L1,rot:0,tool:null,held:null};
+  function set(x,y,rot=st.rot){
+    st.x=x;st.y=y;st.rot=rot;
+    const wx=x,wy=y-L3;let dx=wx-bx,dy=wy-by;let d=Math.hypot(dx,dy);const m=L1+L2-1;if(d>m){dx*=m/d;dy*=m/d;d=m}
+    const c=Math.max(-1,Math.min(1,(d*d-L1*L1-L2*L2)/(2*L1*L2)));
+    let a2=Math.acos(c);let a1=Math.atan2(dy,dx)-Math.atan2(L2*Math.sin(a2),L1+L2*Math.cos(a2));
+    const ey1=by+L1*Math.sin(a1);
+    const b2=-a2,b1=Math.atan2(dy,dx)-Math.atan2(L2*Math.sin(b2),L1+L2*Math.cos(b2));
+    if(by+L1*Math.sin(b1)<ey1){a1=b1;a2=b2}
+    const a3=Math.PI/2-a1-a2,D=180/Math.PI;
+    j1.setAttribute('transform',`translate(${bx},${by}) rotate(${a1*D})`);
+    j2.setAttribute('transform',`translate(${L1},0) rotate(${a2*D})`);
+    j3.setAttribute('transform',`translate(${L2},0) rotate(${a3*D})`);
+    tg.setAttribute('transform',`rotate(${-90+rot})`);
+    if(st.held)st.held.place(x,y);
+  }
+  const move=(x,y,ms,tok,rot)=>{const x0=st.x,y0=st.y,r0=st.rot,r1=rot??st.rot;return tween(ms,tok,e=>set(x0+(x-x0)*e,y0+(y-y0)*e,r0+(r1-r0)*e))};
+  const mount=k=>{for(const n in T)T[n].style.display=n===k?'':'none';st.tool=k};
+  return {set,move,mount,st,T,g};
+}
+/* tools drawn world-aligned, wrist at 0,0, tip at 0,L3 */
+const TOOLS={
+  grip(g,s,L){el('rect',{x:-16,y:0,width:32,height:12,fill:'#2a2e33'},g);el('rect',{x:-14,y:12,width:28,height:20,rx:3,fill:'#8a929b'},g);g.f1=el('rect',{x:-14,y:32,width:5,height:L-32,fill:'#2a2e33'},g);g.f2=el('rect',{x:9,y:32,width:5,height:L-32,fill:'#2a2e33'},g)},
+  grinder(g,s,L){el('rect',{x:-14,y:0,width:28,height:10,fill:'#2a2e33'},g);el('rect',{x:-12,y:10,width:24,height:L-24,rx:4,fill:'#1d5fbf'},g);g.disc=el('ellipse',{cx:0,cy:L-8,rx:26,ry:7,fill:'#8a929b',stroke:'#2a2e33','stroke-width':2,'stroke-dasharray':'6 5'},g)},
+  glue(g,s,L){el('rect',{x:-14,y:0,width:28,height:10,fill:'#2a2e33'},g);el('rect',{x:-11,y:10,width:22,height:L-30,rx:4,fill:'#e8590c'},g);el('path',{d:`M-6 ${L-20} L6 ${L-20} L1 ${L} L-1 ${L}Z`,fill:'#2a2e33'},g)},
+  knife(g,s,L){el('rect',{x:-14,y:0,width:28,height:10,fill:'#2a2e33'},g);el('rect',{x:-9,y:10,width:18,height:L-36,rx:3,fill:'#3a3f45'},g);el('path',{d:`M-7 ${L-26} L7 ${L-26} L2 ${L} L-3 ${L-4}Z`,fill:'#c9ced4',stroke:'#2a2e33','stroke-width':1.5},g)}
+};
+const floor=(svg,y,w=800)=>{el('rect',{x:0,y,width:w,height:600,fill:'#e7e5df'},svg);el('line',{x1:0,y1:y,x2:w,y2:y,stroke:'#cfcdc6','stroke-width':2},svg)};
+const conveyor=(svg,x1,x2,y)=>{const g=el('g',{},svg);el('rect',{x:x1,y,width:x2-x1,height:16,rx:8,fill:'#3a3f45'},g);for(let x=x1+12;x<x2;x+=28)el('circle',{cx:x,cy:y+8,r:5,fill:'#8a929b'},g);el('rect',{x:x1+20,y:y+16,width:10,height:420-(y+16),fill:'#5b6168'},g);el('rect',{x:x2-30,y:y+16,width:10,height:420-(y+16),fill:'#5b6168'},g);return g};
+const label=(svg,x,y,t,attrs={})=>{const e=el('text',Object.assign({x,y,'font-size':18,fill:'#5d636b'},attrs),svg);e.textContent=t;return e};
+const steps=id=>{const sp=[...document.querySelectorAll('#'+id+' span')];return i=>sp.forEach((s,k)=>{s.className=k===i?'on':k<i?'done':''})};
+
+/* ---------- scenes ---------- */
+const scenes={};
+
+scenes.cover=(svg,tok)=>{
+  svg.innerHTML='';floor(svg,520);
+  el('rect',{x:470,y:460,width:220,height:60,rx:6,fill:'#cfcdc6'},svg);label(svg,580,500,'Output',{'text-anchor':'middle'});
+  el('rect',{x:60,y:460,width:200,height:60,rx:6,fill:'#cfcdc6'},svg);label(svg,160,500,'Input',{'text-anchor':'middle'});
+  const arm=Arm(svg,{bx:370,by:340,L1:190,L2:170,L3:70,tools:{grip:TOOLS.grip}});arm.mount('grip');arm.set(370,260);
+  const cnt=label(svg,400,600,'',{'text-anchor':'middle','font-size':24,fill:'#16191d'});let n=0;
+  const run=async()=>{for(;;){
+    const box=el('rect',{x:140,y:420,width:40,height:40,rx:4,fill:'#e8590c'},svg);
+    const held={place:(x,y)=>{box.setAttribute('x',x-20);box.setAttribute('y',y)}};
+    await arm.move(160,300,700,tok);await arm.move(160,420,500,tok);arm.st.held=held;
+    await arm.move(260,220,600,tok);await arm.move(560,220,900,tok);await arm.move(560,420,500,tok);arm.st.held=null;
+    n++;cnt.textContent=`Cycles: ${n}`;await arm.move(370,260,700,tok);
+    box.style.transition='opacity .6s';box.style.opacity=0;await sleep(400,tok);box.remove()}};
+  return run();
+};
+
+scenes.estun=(svg,tok)=>{
+  svg.innerHTML='';floor(svg,420);conveyor(svg,20,780,350);
+  label(svg,24,436,'Estun 6-axis · grinding cell',{'font-size':16,fill:'#16191d','font-weight':600});
+  const cnt=label(svg,776,40,'',{'text-anchor':'end','font-size':20,fill:'#16191d'});
+  const arm=Arm(svg,{bx:250,by:250,L1:150,L2:140,L3:70,s:.85,tools:{grinder:TOOLS.grinder}});arm.mount('grinder');arm.set(330,190);
+  const disc=arm.T.grinder.disc;
+  const step=steps('st-estun');let n=0;
+  const sparks=el('g',{},svg);
+  const run=async()=>{for(;;){
+    const part=el('g',{},svg);el('rect',{x:0,y:0,width:150,height:28,rx:3,fill:'#5b6168'},part);
+    const burrs=[];for(let i=0;i<14;i++)burrs.push(el('path',{d:`M${6+i*10} 0 L${11+i*10} -9 L${16+i*10} 0Z`,fill:'#a8551b'},part));
+    step(0);await tween(1100,tok,e=>part.setAttribute('transform',`translate(${-160+e*540},322)`));
+    step(1);await arm.move(392,312,600,tok);
+    disc.style.animation='none';let ang=0;
+    await tween(1800,tok,(e)=>{const x=392+e*130;arm.set(x,314);ang+=40;disc.setAttribute('stroke-dashoffset',ang);
+      burrs.forEach((b,i)=>{if(380+6+i*10<x+6)b.style.display='none'});
+      if(Math.random()<.7){const sp=el('line',{x1:x,y1:316,x2:x-20-Math.random()*40,y2:296-Math.random()*40,stroke:'#ffb400','stroke-width':2},sparks);setTimeout(()=>sp.remove(),160)}});
+    await arm.move(450,220,500,tok);
+    step(2);await tween(1000,tok,e=>part.setAttribute('transform',`translate(${380+e*440},322)`));part.remove();n++;cnt.textContent=`Parts finished: ${n}`}};
+  return run();
+};
+
+scenes.glue=(svg,tok)=>{
+  svg.innerHTML='';floor(svg,420);
+  label(svg,24,436,'Nachi MZ07 · glue + cut with tool change',{'font-size':16,fill:'#16191d','font-weight':600});
+  // rack
+  el('rect',{x:170,y:300,width:150,height:14,fill:'#3a3f45'},svg);el('rect',{x:180,y:314,width:10,height:106,fill:'#5b6168'},svg);el('rect',{x:300,y:314,width:10,height:106,fill:'#5b6168'},svg);
+  label(svg,245,345,'Tool rack',{'text-anchor':'middle'});
+  const L3=70,slot={glue:[210,230],knife:[280,230]};
+  const rk={};for(const k of ['glue','knife']){rk[k]=el('g',{transform:`translate(${slot[k][0]},${slot[k][1]})`},svg);TOOLS[k](rk[k],1,L3)}
+  // jig
+  el('rect',{x:380,y:360,width:240,height:60,fill:'#3a3f45'},svg);label(svg,500,396,'Jig press',{'text-anchor':'middle',fill:'#e7e5df'});
+  const clamp=el('rect',{x:395,y:250,width:20,height:30,fill:'#1d5fbf'},svg);
+  const partG=el('g',{},svg);
+  const arm=Arm(svg,{bx:110,by:230,L1:220,L2:205,L3,s:.85,tools:{glue:TOOLS.glue,knife:TOOLS.knife}});arm.set(300,150);
+  const step=steps('st-glue');const sig=i=>document.getElementById('g-s'+i).classList.add('on');const sigOff=()=>[0,1,2,3].forEach(i=>document.getElementById('g-s'+i).classList.remove('on'));
+  const take=async k=>{const [x,y]=slot[k];await arm.move(x,y-60+L3,600,tok);await arm.move(x,y+L3,400,tok);rk[k].style.display='none';arm.mount(k);sig(1);await arm.move(x,y-70+L3,400,tok)};
+  const put=async k=>{const [x,y]=slot[k];await arm.move(x,y-60+L3,700,tok);await arm.move(x,y+L3,400,tok);arm.mount(null);rk[k].style.display='';await arm.move(x,y-70+L3,400,tok)};
+  const run=async()=>{for(;;){
+    sigOff();partG.innerHTML='';
+    const body=el('rect',{x:400,y:330,width:150,height:30,rx:3,fill:'#eceae4',stroke:'#2a2e33','stroke-width':2},partG);
+    const flap=el('rect',{x:550,y:330,width:26,height:30,fill:'#eceae4',stroke:'#2a2e33','stroke-width':2},partG);
+    const bead=el('line',{x1:408,y1:327,x2:408,y2:327,stroke:'#e8590c','stroke-width':6,'stroke-linecap':'round'},partG);
+    step(0);await tween(500,tok,e=>clamp.setAttribute('y',250+e*50));sig(0);await sleep(300,tok);
+    step(1);await take('glue');
+    step(2);await arm.move(408,327,800,tok);await tween(1600,tok,e=>{const x=408+e*134;arm.set(x,327);bead.setAttribute('x2',x)});await arm.move(500,250,400,tok);
+    step(3);await put('glue');await take('knife');
+    step(4);await arm.move(551,300,800,tok);await arm.move(551,364,700,tok);await arm.move(551,280,400,tok);
+    flap.style.transition='transform .8s ease-in, opacity .8s';flap.style.transformOrigin='563px 345px';flap.style.transform='translate(20px,60px) rotate(40deg)';flap.style.opacity=0;
+    await put('knife');sig(2);
+    step(5);await tween(400,tok,e=>clamp.setAttribute('y',300-e*50));sig(3);await arm.move(300,150,700,tok);
+    await tween(700,tok,e=>partG.setAttribute('transform',`translate(0,${e*-8}) `+`translate(${e*300},0)`));partG.removeAttribute('transform');await sleep(300,tok)}};
+  return run();
+};
+
+scenes.mag=(svg,tok)=>{
+  svg.innerHTML='';floor(svg,420);conveyor(svg,470,790,360);
+  label(svg,24,436,'Nachi · magnet flipping before coating',{'font-size':16,fill:'#16191d','font-weight':600});
+  el('rect',{x:250,y:350,width:120,height:70,fill:'#3a3f45'},svg);label(svg,310,392,'Station',{'text-anchor':'middle',fill:'#e7e5df'});
+  label(svg,630,404,'To coating',{'text-anchor':'middle'});
+  const cnt=label(svg,776,40,'',{'text-anchor':'end','font-size':20,fill:'#16191d'});
+  const arm=Arm(svg,{bx:140,by:240,L1:200,L2:190,L3:70,s:.85,tools:{grip:TOOLS.grip}});arm.mount('grip');arm.set(250,180);
+  const step=steps('st-mag');let n=0;
+  const mk=()=>{const g=el('g',{},svg);const inner=el('g',{},g);el('rect',{x:-32,y:-10,width:64,height:10,fill:'#d6342b'},inner);el('rect',{x:-32,y:0,width:64,height:10,fill:'#1d5fbf'},inner);
+    const tN=el('text',{x:0,y:-1,'font-size':10,'text-anchor':'middle',fill:'#fff'},inner);tN.textContent='N';const tS=el('text',{x:0,y:9,'font-size':10,'text-anchor':'middle',fill:'#fff'},inner);tS.textContent='S';
+    let sy=1;return {g,inner,flip:v=>{sy=v;inner.setAttribute('transform',`scale(1,${v})`)},place:(x,y)=>g.setAttribute('transform',`translate(${x},${y+10})`)}};
+  const run=async()=>{for(;;){
+    const m=mk();m.place(310,330);step(0);
+    await arm.move(310,260,600,tok);await arm.move(310,330,400,tok);arm.st.held=m;await arm.move(360,200,600,tok);
+    step(1);await tween(900,tok,e=>m.flip(Math.cos(e*Math.PI)));
+    step(2);await arm.move(560,270,700,tok);await arm.move(560,340,400,tok);arm.st.held=null;await arm.move(470,210,500,tok);
+    n++;cnt.textContent=`Magnets flipped: ${n}`;
+    tween(1200,tok,e=>{m.place(560+e*220,340);m.g.style.opacity=1-e}).then(()=>m.g.remove()).catch(()=>{});await arm.move(250,180,500,tok)}};
+  return run();
+};
+
+scenes.vis=(svg,tok)=>{
+  svg.innerHTML='';floor(svg,420);conveyor(svg,10,470,360);
+  label(svg,24,436,'Keyence camera + robot · part identification',{'font-size':16,fill:'#16191d','font-weight':600});
+  el('rect',{x:270,y:70,width:60,height:36,rx:6,fill:'#2a2e33'},svg);el('rect',{x:288,y:106,width:24,height:12,fill:'#2a2e33'},svg);label(svg,300,62,'Camera',{'text-anchor':'middle'});
+  const beam=el('path',{d:'M300 118 L250 350 L350 350Z',fill:'#1d5fbf',opacity:0},svg);
+  const tag=el('g',{opacity:0},svg);el('rect',{x:180,y:150,width:240,height:40,rx:8,fill:'#1b8a50'},tag);const tt=el('text',{x:300,y:177,'text-anchor':'middle','font-size':20,fill:'#fff','font-weight':600},tag);
+  const types=[{n:'A',c:'#e8590c',shape:'circle'},{n:'B',c:'#1d5fbf',shape:'rect'},{n:'C',c:'#1b8a50',shape:'tri'}];
+  const bx=[560,640,720];const bins=bx.map((x,i)=>{el('rect',{x:x-32,y:370,width:64,height:50,fill:'none',stroke:'#3a3f45','stroke-width':4},svg);label(svg,x,440-2,'Type '+types[i].n,{'text-anchor':'middle'});return label(svg,x,362,'0',{'text-anchor':'middle',fill:'#16191d','font-weight':700})});
+  const counts=[0,0,0];
+  const arm=Arm(svg,{bx:420,by:200,L1:165,L2:150,L3:60,s:.8,tools:{grip:TOOLS.grip}});arm.mount('grip');arm.set(500,170);
+  const step=steps('st-vis');
+  const mk=t=>{const g=el('g',{},svg);if(t.shape==='circle')el('circle',{cx:0,cy:-14,r:14,fill:t.c},g);else if(t.shape==='rect')el('rect',{x:-14,y:-28,width:28,height:28,fill:t.c},g);else el('path',{d:'M-16 0 L16 0 L0 -28Z',fill:t.c},g);
+    return {g,place:(x,y)=>g.setAttribute('transform',`translate(${x},${y+28})`)}};
+  const run=async()=>{for(let k=0;;k++){
+    const ti=[1,0,2,1,2,0][k%6],t=types[ti],p=mk(t);
+    step(0);await tween(900,tok,e=>p.place(-30+e*330,332));
+    step(1);beam.setAttribute('opacity',.18);await sleep(450,tok);tt.textContent=`Type ${t.n} · OK`;tag.setAttribute('opacity',1);beam.setAttribute('opacity',0);
+    step(2);await sleep(600,tok);
+    step(3);await tween(600,tok,e=>p.place(300+e*140,332));tag.setAttribute('opacity',0);
+    await arm.move(440,300,450,tok);await arm.move(440,334,300,tok);arm.st.held=p;await arm.move(470,240,400,tok);
+    await arm.move(bx[ti],300,600,tok);await arm.move(bx[ti],380,300,tok);arm.st.held=null;counts[ti]++;bins[ti].textContent=counts[ti];
+    p.g.style.transition='opacity .5s';p.g.style.opacity=0;setTimeout(()=>p.g.remove(),600);await arm.move(500,170,500,tok)}};
+  return run();
+};
+
+/* ---------- deck ---------- */
+const stage=document.getElementById('stage'),slides=[...document.querySelectorAll('.slide')];
+const dots=document.getElementById('dots'),count=document.getElementById('count'),notes=document.getElementById('notes');
+const sceneOf={0:['cover','sc-cover'],3:['estun','sc-estun'],4:['glue','sc-glue'],5:['mag','sc-mag'],6:['vis','sc-vis']};
+let cur=0,tok=null;
+dots.innerHTML=slides.map((s,i)=>`<button data-i="${i}">${i+1} ${s.dataset.title}</button>`).join('');
+const fit=()=>{const s=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`scale(${s})`};addEventListener('resize',fit);fit();
+function startScene(i){if(tok){tok.dead=true;tok.timers.forEach(clearTimeout)}tok={dead:false,timers:[]};const sc=sceneOf[i];if(!sc)return;
+  const svg=document.getElementById(sc[1]);if(svg.style.display==='none')return;scenes[sc[0]](svg,tok).catch(()=>{})}
+function show(i){i=Math.max(0,Math.min(slides.length-1,i));
+  slides[cur].querySelectorAll('video').forEach(v=>v.pause());
+  slides.forEach((s,k)=>s.classList.toggle('on',k===i));cur=i;
+  [...dots.children].forEach((b,k)=>k===i?b.setAttribute('aria-current','step'):b.removeAttribute('aria-current'));
+  count.textContent=`${i+1} / ${slides.length}`;notes.textContent=slides[i].dataset.notes||'';
+  slides[i].querySelectorAll('.bar i').forEach(b=>{b.style.width='0%';requestAnimationFrame(()=>requestAnimationFrame(()=>b.style.width=b.dataset.w+'%'))});
+  startScene(i);try{history.replaceState(null,'',location.search+'#s'+(i+1))}catch(e){}window.livePush&&livePush()}
+dots.onclick=e=>{const b=e.target.closest('button');if(b)show(+b.dataset.i)};
+document.getElementById('prev').onclick=()=>show(cur-1);document.getElementById('next').onclick=()=>show(cur+1);
+document.getElementById('nbtn').onclick=()=>notes.classList.toggle('on');
+document.getElementById('fs').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}};
+addEventListener('keydown',e=>{if(window.LIVE_VIEW)return;if(['ArrowRight','PageDown',' '].includes(e.key)&&e.target.tagName!=='VIDEO'){e.preventDefault();show(cur+1)}else if(['ArrowLeft','PageUp'].includes(e.key)){show(cur-1)}else if(e.key==='n'||e.key==='N')notes.classList.toggle('on');else if(e.key==='f'||e.key==='F')document.getElementById('fs').click()});
+/* tabs */
+const tabState={};
+function setTab(id,k,autoplay){const t=document.querySelector(`.tabs[data-for="${id}"]`),box=document.getElementById(id);if(!t||!box)return;const kids=[...box.children];if(!kids[k])return;tabState[id]=k;
+  t.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.show===k));
+  kids.forEach((c,i)=>{c.hidden=false;c.style.display=i===k?'':'none';if(c.tagName==='VIDEO'){if(i===k&&autoplay)c.play().catch(()=>{});else if(i!==k)c.pause()}});
+  if(kids[k].tagName.toLowerCase()==='svg'){if(box.closest('.slide')===slides[cur])startScene(cur)}else if(tok&&box.querySelector('svg')){tok.dead=true}}
+document.querySelectorAll('.tabs').forEach(t=>{t.onclick=e=>{if(window.LIVE_VIEW)return;const b=e.target.closest('button');if(!b)return;setTab(t.dataset.for,+b.dataset.show,true);window.livePush&&livePush()}});
+document.querySelectorAll('video').forEach((v,i)=>{v.dataset.vi=i;for(const ev of ['play','pause','seeked'])v.addEventListener(ev,()=>window.livePush&&livePush())});
+/* HMI */
+const H={b:{need:['b-plc','b-nachi'],got:[]},a:{need:['a-nachi'],got:[]}};
+let hTimers=[];
+function hRun(side){const pos=[...document.querySelectorAll('#h'+side+' span')];const s=document.getElementById('h'+side+'-s');
+  pos.forEach((p,i)=>hTimers.push(setTimeout(()=>{pos.forEach(q=>q.classList.remove('on'));p.classList.add('on');s.textContent=['Leaving pickup jig…','Moving to taught clearance…','Robot at HOME. Ready to restart.'][i]},600+i*900)))}
+function hReset(){hTimers.forEach(clearTimeout);hTimers=[];for(const k of ['a','b']){H[k].got=[];document.querySelectorAll('#h'+k+' span').forEach((p,i)=>p.classList.toggle('on',i===0));document.getElementById('h'+k+'-s').textContent='Robot stopped at pickup jig.'}}
+document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{if(window.LIVE_VIEW)return;const id=b.dataset.h,side=id[0],h=H[side],s=document.getElementById('h'+side+'-s');
+  const want=h.need[h.got.length];if(!want)return;
+  if(id!==want){s.textContent='Press the PLC panel first.';return}
+  h.got.push(id);if(h.got.length<h.need.length){s.textContent='PLC OK. Now walk to the Nachi panel…';return}hRun(side)});
+document.getElementById('h-reset').onclick=hReset;hReset();
+const m=/^#s(\d+)$/.exec(location.hash);show(m?+m[1]-1:0);
+
+/* ---------- live presenter / viewer ---------- */
+(()=>{
+  const q=new URLSearchParams(location.search),path=location.pathname;
+  const isP=/presenter\.html$/.test(path)||q.get('mode')==='presenter';
+  const isV=/viewer\.html$/.test(path)||q.get('mode')==='view';
+  if(!isP&&!isV){if(location.protocol==='file:')return;const b=document.getElementById('live');b.hidden=false;b.querySelector('#lstat').innerHTML='<a href="presenter.html">Presenter</a> · <a href="viewer.html">View</a>';return}
+  const box=document.getElementById('live'),stat=document.getElementById('lstat'),btn=document.getElementById('lbtn');
+  const say=(t,ok)=>{stat.textContent=t;box.classList.toggle('ok',!!ok)};
+  const snap=()=>({slide:cur,tabs:{...tabState},videos:[...document.querySelectorAll('video')].map(v=>({p:!v.paused&&!v.ended,t:Math.round(v.currentTime*10)/10})),ts:Date.now()});
+  const NTFY='https://ntfy.sh/';
+  const viewerURL=(kind,id)=>{const base=location.href.split('#')[0].split('?')[0].replace(/(presenter|viewer|index)\.html$/,'');return kind==='api'?base+'viewer.html?session='+id:base+'viewer.html?topic='+id};
+  if(isP){
+    box.hidden=false;btn.hidden=false;btn.textContent='Start live session';say('Presenter');
+    let cred=null,last='',sending=false,again=false;
+    async function push(){if(!cred)return;const body=JSON.stringify(snap());if(body.replace(/"ts":\d+/,'')===last.replace(/"ts":\d+/,''))return;if(sending){again=true;return}sending=true;
+      try{if(cred.kind==='api'){const r=await fetch('/api/live/sessions/'+cred.id,{method:'PUT',headers:{'Content-Type':'application/json','X-Presenter-Key':cred.key},body});if(!r.ok)throw 0}
+        else{const r=await fetch(NTFY+cred.id,{method:'POST',body});if(!r.ok)throw 0}
+        last=body;say('Session live',true)}catch(e){say('Sync interrupted · retrying')}finally{sending=false;if(again){again=false;push()}}}
+    window.livePush=push;
+    const showQR=()=>{const url=viewerURL(cred.kind,cred.id);const c=document.getElementById('qrc');c.innerHTML='';
+      if(cred.kind==='api'){const im=new Image();im.alt='QR';im.src='/api/live/qr/'+cred.id;im.onerror=()=>{c.innerHTML='';try{new QRCode(c,{text:url,width:260,height:260})}catch(e){c.textContent='(QR not available – share the link)'}};c.appendChild(im)}
+      else{try{new QRCode(c,{text:url,width:260,height:260})}catch(e){c.textContent='(QR not available – share the link)'}}
+      const a=document.getElementById('qrl');a.href=url;a.textContent=url;document.getElementById('qr').classList.add('on')};
+    document.getElementById('qrx').onclick=()=>document.getElementById('qr').classList.remove('on');
+    btn.onclick=async()=>{if(cred)return showQR();btn.disabled=true;say('Starting…');
+      try{const r=await fetch('/api/live/sessions',{method:'POST'});if(!r.ok)throw 0;const j=await r.json();if(!/^[0-9a-f]{24}$/.test(j.session||''))throw 0;cred={kind:'api',id:j.session,key:j.key}}
+      catch(e){const a=new Uint8Array(12);crypto.getRandomValues(a);cred={kind:'ntfy',id:'fais-deck-'+[...a].map(b=>b.toString(16).padStart(2,'0')).join('')}}
+      btn.disabled=false;btn.textContent='Show View QR';last='';await push();setInterval(()=>{last='';push()},5000);showQR()};
+    return}
+  if(isV){
+    window.LIVE_VIEW=true;document.documentElement.classList.add('viewer');box.hidden=false;
+    const sess=q.get('session'),topic=q.get('topic');
+    if(!(sess&&/^[0-9a-f]{24}$/.test(sess))&&!(topic&&/^fais-deck-[0-9a-f]{24}$/.test(topic))){say('Scan the QR from Presenter.');return}
+    let lastTs=0;
+    function apply(st){if(!st||typeof st!=='object'||typeof st.slide!=='number')return;if(st.ts&&st.ts<lastTs)return;lastTs=st.ts||lastTs;
+      if(st.slide!==cur)show(st.slide);
+      for(const id in (st.tabs||{}))if(tabState[id]!==st.tabs[id])setTab(id,+st.tabs[id],false);
+      const vs=[...document.querySelectorAll('video')];(st.videos||[]).forEach((x,i)=>{const v=vs[i];if(!v||!x)return;
+        if(Math.abs(v.currentTime-x.t)>1.5)try{v.currentTime=x.t}catch(e){}
+        if(x.p&&v.paused){v.muted=true;v.play().catch(()=>{})}else if(!x.p&&!v.paused)v.pause()});
+      say('Following presenter',true)}
+    if(sess){let rev=-1;const poll=async()=>{try{const r=await fetch('/api/live/sessions/'+sess,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();if(j.revision!==rev){rev=j.revision;apply(j.state)}else say('Following presenter',true)}catch(e){say('Waiting for presenter session')}finally{setTimeout(poll,900)}};poll()}
+    else{say('Connecting…');
+      fetch(NTFY+topic+'/json?poll=1&since=30m').then(r=>r.text()).then(t=>{const ls=t.trim().split('\n').filter(Boolean).map(l=>{try{return JSON.parse(l)}catch(e){return null}}).filter(m=>m&&m.event==='message');const m=ls[ls.length-1];if(m)try{apply(JSON.parse(m.message))}catch(e){}}).catch(()=>{});
+      const es=new EventSource(NTFY+topic+'/sse');es.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.event==='message')apply(JSON.parse(m.message))}catch(err){}};es.onerror=()=>say('Reconnecting…');es.onopen=()=>say('Waiting for presenter',true)}
+  }
+})();
+}
+</script>
+</body>
+</html>
