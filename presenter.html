@@ -16,8 +16,8 @@
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;height:100%;background:#22262b;overflow:hidden}
 body{font:24px/1.4 Barlow,system-ui,sans-serif;color:var(--ink)}
-#wrap{position:fixed;inset:0;display:grid;place-items:center}
-#stage{width:1600px;height:900px;position:relative;transform-origin:center;background:var(--bg);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+#wrap{position:fixed;inset:0;overflow:hidden}
+#stage{width:1600px;height:900px;position:absolute;left:50%;top:50%;transform-origin:center;background:var(--bg);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
 .slide{position:absolute;inset:0;padding:56px 72px 96px;display:none;flex-direction:column}
 .slide.on{display:flex;animation:in .45s ease both}
 @keyframes in{from{opacity:0;transform:translateY(12px)}}
@@ -116,6 +116,15 @@ svg text{font-family:Barlow,sans-serif}
 #qr #qrc{display:grid;place-items:center;min-height:260px;margin:12px 0}#qr #qrc img,#qr #qrc canvas{width:260px;height:260px}
 #qr a{word-break:break-all;color:var(--bl)}#qr button{font:600 17px Barlow;padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:#f3f2ee;cursor:pointer;margin-top:10px}
 html.viewer #nav button,html.viewer #nbtn{display:none}html.viewer #stage .slide{pointer-events:none}html.viewer #count{margin-left:auto}
+#remote{display:none}
+html.remote body{overflow:auto;background:#16191d}html.remote #wrap{position:relative;inset:auto}
+html.remote #stage{top:0;transform-origin:top center}html.remote #nav,html.remote #live{display:none}
+html.remote #remote{display:block;position:absolute;left:0;right:0;padding:12px 14px 40px;color:#f3f2ee;font:17px/1.45 Barlow,system-ui,sans-serif}
+#remote .rb{display:grid;grid-template-columns:1fr 1fr;gap:10px}#remote button{font:700 20px Barlow,system-ui,sans-serif;padding:18px 10px;border-radius:12px;border:0;background:#f3f2ee;color:#16191d}
+#remote button.nx{background:#e8590c;color:#fff}#remote .top{display:flex;justify-content:space-between;align-items:center;margin:10px 0}
+#remote .lv{display:flex;gap:10px;align-items:center;margin:8px 0}#remote .lv button{padding:12px 14px;font-size:17px;background:#2a2e33;color:#fff;flex:1}
+#remote .nt{background:#2a2e33;border-radius:12px;padding:14px;margin-top:10px;font-size:17px}#remote .ttl{font-weight:700;font-size:19px}
+#remote .ds{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}#remote .ds button{padding:8px 10px;font-size:14px;background:#2a2e33;color:#cfcdc6}#remote .ds button.on{background:#f3f2ee;color:#16191d}
 @media (prefers-reduced-motion:reduce){.slide.on{animation:none}}
 </style>
 </head>
@@ -339,6 +348,7 @@ html.viewer #nav button,html.viewer #nbtn{display:none}html.viewer #stage .slide
 <div id="live" hidden><span class="dot"></span><span id="lstat"></span><button id="lbtn" hidden></button></div>
 <nav id="nav"><button id="prev" aria-label="Previous slide">← Back</button><div id="dots"></div><span id="count"></span><button id="nbtn" title="Speaker notes (N)">Notes</button><button id="fs" title="Full screen (F)">Full screen</button><button id="next" aria-label="Next slide">Next →</button></nav>
 </div></div>
+<div id="remote"><div class="lv"><span id="rstat">Presenter</span><button id="rlive">Start live session</button></div><div class="rb"><button id="rprev">← Back</button><button class="nx" id="rnext">Next →</button></div><div class="top"><span class="ttl" id="rttl"></span><span id="rcnt"></span></div><div class="nt" id="rnote"></div><div class="ds" id="rds"></div></div>
 <div id="qr" role="dialog" aria-label="Scan to follow"><div class="box"><b style="font-size:22px">Scan to follow this presentation</b><div id="qrc"></div><a id="qrl" target="_blank"></a><br><button id="qrx">Close</button></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
@@ -523,14 +533,25 @@ const dots=document.getElementById('dots'),count=document.getElementById('count'
 const sceneOf={0:['cover','sc-cover'],3:['estun','sc-estun'],4:['glue','sc-glue'],5:['mag','sc-mag'],6:['vis','sc-vis']};
 let cur=0,tok=null;
 dots.innerHTML=slides.map((s,i)=>`<button data-i="${i}">${i+1} ${s.dataset.title}</button>`).join('');
-const fit=()=>{const s=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`scale(${s})`};addEventListener('resize',fit);fit();
+const qp=new URLSearchParams(location.search);const PRES=/presenter\.html$/.test(location.pathname)||qp.get('mode')==='presenter';
+const fit=()=>{const remote=PRES&&(innerWidth<900||innerHeight>innerWidth);document.documentElement.classList.toggle('remote',remote);
+  if(remote){const s=innerWidth/1600;stage.style.transform=`translate(-50%,0) scale(${s})`;const r=document.getElementById('remote');r.style.top=(900*s+4)+'px';document.getElementById('wrap').style.height=(900*s)+'px'}
+  else{const s=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${s})`;document.getElementById('wrap').style.height=''}};
+addEventListener('resize',fit);fit();
+const rds=document.getElementById('rds');rds.innerHTML=slides.map((sl,i)=>`<button data-i="${i}">${i+1} ${sl.dataset.title}</button>`).join('');
+rds.onclick=e=>{const b=e.target.closest('button');if(b)show(+b.dataset.i)};
+document.getElementById('rprev').onclick=()=>show(cur-1);document.getElementById('rnext').onclick=()=>show(cur+1);
+document.getElementById('rlive').onclick=()=>document.getElementById('lbtn').click();
+const rsync=()=>{document.getElementById('rttl').textContent=slides[cur].dataset.title;document.getElementById('rcnt').textContent=`${cur+1} / ${slides.length}`;document.getElementById('rnote').textContent=slides[cur].dataset.notes||'';[...rds.children].forEach((b,k)=>b.classList.toggle('on',k===cur));
+  document.getElementById('rstat').textContent=document.getElementById('lstat').textContent||'Presenter';document.getElementById('rlive').textContent=document.getElementById('lbtn').textContent||'Start live session'};
+setInterval(rsync,700);
 function startScene(i){if(tok){tok.dead=true;tok.timers.forEach(clearTimeout)}tok={dead:false,timers:[]};const sc=sceneOf[i];if(!sc)return;
   const svg=document.getElementById(sc[1]);if(svg.style.display==='none')return;scenes[sc[0]](svg,tok).catch(()=>{})}
 function show(i){i=Math.max(0,Math.min(slides.length-1,i));
   slides[cur].querySelectorAll('video').forEach(v=>v.pause());
   slides.forEach((s,k)=>s.classList.toggle('on',k===i));cur=i;
   [...dots.children].forEach((b,k)=>k===i?b.setAttribute('aria-current','step'):b.removeAttribute('aria-current'));
-  count.textContent=`${i+1} / ${slides.length}`;notes.textContent=slides[i].dataset.notes||'';
+  count.textContent=`${i+1} / ${slides.length}`;try{rsync()}catch(e){}notes.textContent=slides[i].dataset.notes||'';
   slides[i].querySelectorAll('.bar i').forEach(b=>{b.style.width='0%';requestAnimationFrame(()=>requestAnimationFrame(()=>b.style.width=b.dataset.w+'%'))});
   startScene(i);try{history.replaceState(null,'',location.search+'#s'+(i+1))}catch(e){}window.livePush&&livePush()}
 dots.onclick=e=>{const b=e.target.closest('button');if(b)show(+b.dataset.i)};
