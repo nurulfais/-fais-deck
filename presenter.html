@@ -190,17 +190,21 @@ html.remote #remote{display:block;position:static;padding:12px 14px 60px;color:#
 </section>
 
 <!-- 4 ESTUN -->
-<section class="slide" data-title="Estun" data-notes="Estun grinding, RM700K. A 6-axis Estun robot grinds the edges of steel piling components. Before, grinding was manual. After automation, output went from 10,000 to 80,000 pieces per day and we reduced the dependency on manual labour.">
+<section class="slide" data-title="Estun" data-notes="Estun grinding, RM700K. I simulated the grinding path offline first, then taught and tuned it on the real robot. A 6-axis Estun robot grinds the edges of steel piling components. Before, grinding was manual. After automation, output went from 10,000 to 80,000 pieces per day and we reduced the dependency on manual labour.">
   <div class="kick">DFS Engineering · 2023 · RM700K</div>
   <h2>Estun grinding robot – 8× output</h2>
   <div class="row">
-    <div class="main"><div class="media"><svg class="sim" id="sc-estun" viewBox="0 0 800 440" role="img" aria-label="Simulation: robot grinds burr on steel part on conveyor"></svg></div>
+    <div class="main">
+      <div class="tabs" data-for="m-estun"><button aria-pressed="true" data-show="0">Process simulation</button><button data-show="1">Offline sim vs real</button><button data-show="2">Real grinding</button></div>
+      <div class="media" id="m-estun"><svg class="sim" id="sc-estun" viewBox="0 0 800 440" role="img" aria-label="Simulation: robot grinds burr on steel part on conveyor"></svg>
+        <div class="split" hidden><video src="media/estun_sim.mp4" poster="media/estun_sim_poster.jpg" controls muted playsinline preload="metadata" loop></video><video src="media/estun_real.mp4" poster="media/estun_real_poster.jpg" controls muted playsinline preload="metadata"></video><span class="tg">Offline simulation</span><span class="tg r">Real</span></div>
+        <video src="media/estun_real.mp4" poster="media/estun_real_poster.jpg" controls muted playsinline preload="metadata" hidden></video></div>
       <div class="steps" id="st-estun"><span>1 · Part in</span><span>2 · Grind edge</span><span>3 · Part out</span></div></div>
     <div class="side">
       <div class="card"><div class="lbl">Output per day</div>
         <div style="font-size:19px;margin-top:8px">Manual grinding</div><div class="bar"><i data-w="12.5">10,000</i></div>
         <div style="font-size:19px">Estun robot</div><div class="bar"><i class="or" data-w="100">80,000</i></div></div>
-      <div class="card"><h3>My role</h3><ul class="pts"><li>6-axis Estun robot for grinding steel piling components</li><li>Grinding path teaching and tuning</li><li>Less manual labour, consistent finish</li></ul></div>
+      <div class="card"><h3>My role</h3><ul class="pts"><li>6-axis Estun robot for grinding steel piling components</li><li>Offline simulation, then grinding path teaching and tuning</li><li>Less manual labour, consistent finish</li></ul></div>
       <div class="note">Animation is a simplified process illustration.</div>
     </div>
   </div>
@@ -649,7 +653,7 @@ function buildRMedia(){const r=document.getElementById('rmedia');if(!r)return;co
   if(v)h+=`<button class="pl" id="rplay">${v.paused?'▶ Play video':'❚❚ Pause video'}</button>`;
   r.innerHTML=h}
 document.getElementById('rmedia').onclick=e=>{const b=e.target.closest('button');if(!b)return;
-  if(b.id==='rplay'){const v=[...slides[cur].querySelectorAll('video')].find(x=>x.getClientRects().length);if(v){v.muted=true;v.paused?v.play().catch(()=>{}):v.pause()}setTimeout(buildRMedia,150);return}
+  if(b.id==='rplay'){const vs=[...slides[cur].querySelectorAll('video')].filter(x=>x.getClientRects().length);const play=vs.length&&vs[0].paused;vs.forEach(v=>{v.muted=true;play?v.play().catch(()=>{}):v.pause()});setTimeout(buildRMedia,150);return}
   setTab(b.dataset.f,+b.dataset.k,true);window.livePush&&livePush();setTimeout(buildRMedia,50)};
 document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>setTimeout(buildRMedia,50));v.addEventListener('pause',()=>setTimeout(buildRMedia,50))});
 
