@@ -404,7 +404,7 @@ html.remote #remote{display:block;position:static;padding:12px 14px 60px;color:#
 <nav id="nav"><button id="prev" aria-label="Previous slide">← Back</button><div id="dots"></div><span id="count"></span><button id="nbtn" title="Speaker notes (N)">Notes</button><button id="fs" title="Full screen (F)">Full screen</button><button id="next" aria-label="Next slide">Next →</button></nav>
 </div></div>
 <div id="remote"><div class="lv"><span id="rstat">Presenter</span><button id="rlive">Start live session</button></div><div class="rb"><button id="rprev">← Back</button><button class="nx" id="rnext">Next →</button></div><div class="top"><span class="ttl" id="rttl"></span><span id="rcnt"></span></div><div class="tl2"><button id="rpen">✏️ Pointer: OFF</button><button id="rclr">Clear drawing</button></div><div class="md" id="rmedia"></div><div class="nt" id="rnote"></div><div class="ds" id="rds"></div></div>
-<div id="qr" role="dialog" aria-label="Scan to follow"><div class="box"><b style="font-size:22px">Scan to follow this presentation</b><div id="qrc"></div><a id="qrl" target="_blank"></a><br><button id="qrx">Close</button></div></div>
+<div id="qr" role="dialog" aria-label="Scan to follow"><div class="box"><b style="font-size:22px">Scan to follow this presentation</b><div id="qrc"></div><a id="qrl" target="_blank"></a><br><button id="qrx">Close</button> <button id="qrnew">New session</button></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <script>
@@ -776,9 +776,12 @@ document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>set
       else{try{new QRCode(c,{text:url,width:260,height:260})}catch(e){c.textContent='(QR not available – share the link)'}}
       const a=document.getElementById('qrl');a.href=url;a.textContent=url;document.getElementById('qr').classList.add('on')};
     document.getElementById('qrx').onclick=()=>document.getElementById('qr').classList.remove('on');
+    document.getElementById('qrnew').onclick=()=>{try{localStorage.removeItem('faisdeck-session')}catch(e){}location.reload()};
+    try{const sv=JSON.parse(localStorage.getItem('faisdeck-session')||'null');if(sv&&Date.now()-sv.t<12*3600e3){setTimeout(async()=>{await btn.onclick();document.getElementById('qr').classList.remove('on')},800)}}catch(e){}
     btn.onclick=async()=>{if(cred)return showQR();btn.disabled=true;say('Starting…');
       try{const r=await fetch('/api/live/sessions',{method:'POST'});if(!r.ok)throw 0;const j=await r.json();if(!/^[0-9a-f]{24}$/.test(j.session||''))throw 0;cred={kind:'api',id:j.session,key:j.key}}
-      catch(e){const a=new Uint8Array(12);crypto.getRandomValues(a);const hx=[...a].map(b=>b.toString(16).padStart(2,'0')).join('');
+      catch(e){const a=new Uint8Array(12);crypto.getRandomValues(a);let hx=[...a].map(b=>b.toString(16).padStart(2,'0')).join('');
+        try{const sv=JSON.parse(localStorage.getItem('faisdeck-session')||'null');if(sv&&/^[0-9a-f]{24}$/.test(sv.id)&&Date.now()-sv.t<12*3600e3)hx=sv.id;localStorage.setItem('faisdeck-session',JSON.stringify({id:hx,t:Date.now()}))}catch(err){}
         if(mqOK()){cred={kind:'mq',id:hx,cs:mqConnect(()=>{if(cred&&mqAny(cred.cs))push(true);else say('Reconnecting…')})};await new Promise(r=>setTimeout(r,1500))}else cred={kind:'ntfy',id:'fais-deck-'+hx}}
       btn.disabled=false;btn.textContent='Show View QR';push(true);setInterval(()=>push(true),30000);
       const wake=()=>{if(document.visibilityState==='visible'){if(cred.cs)mqRevive(cred.cs);push(true)}};document.addEventListener('visibilitychange',wake);addEventListener('pageshow',wake);addEventListener('online',()=>push(true));showQR()};
