@@ -672,7 +672,7 @@ function setTab(id,k,autoplay){const t=document.querySelector(`.tabs[data-for="$
   kids.forEach((c,i)=>{c.hidden=false;c.style.display=i===k?'':'none';const vs=c.tagName==='VIDEO'?[c]:[...c.querySelectorAll('video')];vs.forEach(v=>{if(i===k&&autoplay)v.play().catch(()=>{});else if(i!==k)v.pause()})});
   if(kids[k].tagName.toLowerCase()==='svg'||kids[k].querySelector('svg')){if(box.closest('.slide')===slides[cur])startScene(cur)}else if(tok&&box.querySelector('svg')){tok.dead=true}}
 document.querySelectorAll('.tabs').forEach(t=>{t.onclick=e=>{if(window.LIVE_VIEW)return;const b=e.target.closest('button');if(!b)return;setTab(t.dataset.for,+b.dataset.show,true);window.livePush&&livePush()}});
-document.querySelectorAll('video').forEach((v,i)=>{v.dataset.vi=i;for(const ev of ['play','pause','seeked'])v.addEventListener(ev,()=>window.livePush&&livePush())});
+document.querySelectorAll('video').forEach((v,i)=>{v.dataset.vi=i;for(const ev of ['play','pause','seeked'])v.addEventListener(ev,()=>window.livePush&&livePush(ev==='seeked'))});
 /* HMI */
 const HSEQ={b:[['Robot stops in jig · ALARM','','alarm'],['Walk to PLC HMI panel','walk','plc'],['Reset alarm','plc','reset'],['Auto → Manual mode','plc','manual'],['Unclamp jig','plc','unclamp'],['Walk to robot pendant','walk','pen'],['Jog robot out to safe area','pen','clear'],['Robot HOME','pen','home'],['Walk back to PLC HMI','walk','plc'],['Manual → Auto · Start','plc','auto']],
  a:[['Robot stops in jig · ALARM','','alarm'],['Reset alarm','pen','reset'],['Auto → Manual (PLC follows)','pen','manual'],['Unclamp jig (PLC permission)','pen','unclamp'],['Move to taught safe area','pen','clear'],['Robot HOME','pen','home'],['Manual → Auto · Start','pen','auto']]};
@@ -695,13 +695,14 @@ function hRender(side,i,animate){const other=side==='a'?'b':'a';hInit(other);
   document.getElementById('res-'+side).classList.toggle('on',i>=n-1);
   if(hmiArm){if(animate&&i>=0&&seq[i][1]!=='walk')hmiArm.act(seq[i][2]);else hmiArm.snap(st)}}
 function hSched(){clearTimeout(HP.t);if(!HP.playing)return;const seq=HSEQ[HP.side];if(HP.i>=seq.length-1){HP.playing=false;hBtns();return}
-  const w=HP.i>=0?seq[HP.i][1]:'';HP.t=setTimeout(()=>{hGo(HP.side,HP.i+1,true);hSched()},HP.i<0?150:(w==='walk'?1500:1100))}
-function hGo(side,i,animate){HP.side=side;HP.i=i;hRender(side,i,animate);hBtns();if(!window.LIVE_VIEW){window.hmiEvt={id:Date.now(),side,i,playing:HP.playing};window.livePush&&livePush()}}
+  const w=HP.i>=0?seq[HP.i][1]:'';HP.t=setTimeout(()=>{hGo(HP.side,HP.i+1,true,true);hSched()},HP.i<0?150:(w==='walk'?1500:1100))}
+function hGo(side,i,animate,auto){HP.side=side;HP.i=i;hRender(side,i,animate);hBtns();if(!window.LIVE_VIEW&&!auto)hPush()}
+function hPush(){window.hmiEvt={id:Date.now(),side:HP.side,i:HP.i,playing:HP.playing};window.livePush&&livePush()}
 function hReset(){clearTimeout(HP.t);HP={side:null,i:-1,playing:false,t:null};['a','b'].forEach(hInit);if(hmiArm)hmiArm.reset();hBtns()}
 function hEnsureSim(){if(tabState['m-hmi'])setTab('m-hmi',0,false)}
 document.querySelectorAll('.hplay').forEach(b=>b.onclick=()=>{if(window.LIVE_VIEW)return;const side=b.dataset.side,n=HSEQ[side].length;hEnsureSim();
-  if(HP.side!==side||HP.i>=n-1){hReset();HP.side=side;HP.i=-1;HP.playing=true;hBtns();hSched();return}
-  HP.playing=!HP.playing;hBtns();if(HP.playing)hSched();else{clearTimeout(HP.t);hGo(side,HP.i,false)}});
+  if(HP.side!==side||HP.i>=n-1){hReset();HP.side=side;HP.i=-1;HP.playing=true;hBtns();hPush();hSched();return}
+  HP.playing=!HP.playing;hBtns();hPush();if(HP.playing)hSched();else clearTimeout(HP.t)});
 document.querySelectorAll('.hstep').forEach(b=>b.onclick=()=>{if(window.LIVE_VIEW)return;const side=b.dataset.side,n=HSEQ[side].length;hEnsureSim();
   clearTimeout(HP.t);HP.playing=false;if(HP.side!==side||HP.i>=n-1){hReset();HP.side=side;HP.i=-1}hGo(side,HP.i+1,true)});
 document.getElementById('h-reset').onclick=()=>{if(window.LIVE_VIEW)return;hReset();window.hmiEvt={id:Date.now(),side:'reset',i:-1};window.livePush&&livePush()};hReset();
@@ -748,13 +749,20 @@ document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>set
   const snap=()=>({slide:cur,ink:window.lastInk||null,hmi:window.hmiEvt||null,tabs:{...tabState},videos:[...document.querySelectorAll('video')].map(v=>({p:!v.paused&&!v.ended,t:Math.round(v.currentTime*10)/10})),ts:Date.now()});
   const NTFY='https://ntfy.sh/';
   const viewerURL=(kind,id)=>{const base=location.href.split('#')[0].split('?')[0].replace(/(presenter|viewer|index)\.html$/,'');return kind==='api'?base+'viewer.html?session='+id:base+'viewer.html?topic='+id};
+  let wl=null;const keepAwake=async()=>{try{if('wakeLock' in navigator&&document.visibilityState==='visible'&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null})}}catch(e){}};
+  addEventListener('pointerdown',keepAwake);document.addEventListener('visibilitychange',keepAwake);keepAwake();
   if(isP){
     box.hidden=false;btn.hidden=false;btn.textContent='Start live session';say('Presenter');
-    let cred=null,last='',sending=false,again=false;
-    async function push(){if(!cred)return;const body=JSON.stringify(snap());if(body.replace(/"ts":\d+/,'')===last.replace(/"ts":\d+/,''))return;if(sending){again=true;return}sending=true;
-      try{if(cred.kind==='api'){const r=await fetch('/api/live/sessions/'+cred.id,{method:'PUT',headers:{'Content-Type':'application/json','X-Presenter-Key':cred.key},body});if(!r.ok)throw 0}
-        else{const r=await fetch(NTFY+cred.id,{method:'POST',body});if(!r.ok)throw 0}
-        last=body;say('Session live',true)}catch(e){say('Sync interrupted · retrying')}finally{sending=false;if(again){again=false;push()}}}
+    let cred=null,last='',sending=false,deb=null,retry=null,fails=0;
+    const vis=()=>({slide:cur,tabs:tabState,hmi:window.hmiEvt||null,ink:window.lastInk||null,vp:[...document.querySelectorAll('video')].map(v=>!v.paused&&!v.ended)});
+    let lastKey='';
+    function push(force){if(!cred)return;const key=JSON.stringify(vis());if(!force&&key===lastKey&&!retry)return;clearTimeout(deb);deb=setTimeout(send,force?0:180)}
+    async function send(){if(sending){clearTimeout(deb);deb=setTimeout(send,300);return}sending=true;clearTimeout(retry);retry=null;const body=JSON.stringify(snap());const key=JSON.stringify(vis());
+      try{let r;if(cred.kind==='api')r=await fetch('/api/live/sessions/'+cred.id,{method:'PUT',headers:{'Content-Type':'application/json','X-Presenter-Key':cred.key},body});
+        else r=await fetch(NTFY+cred.id,{method:'POST',body});if(!r.ok)throw r.status;
+        lastKey=key;fails=0;say('Session live',true)}
+      catch(e){fails++;say(e===429?'Busy · retrying…':'Sync interrupted · retrying…');retry=setTimeout(()=>{retry=null;send()},Math.min(10000,2000*fails))}
+      finally{sending=false}}
     window.livePush=push;
     const showQR=()=>{const url=viewerURL(cred.kind,cred.id);const c=document.getElementById('qrc');c.innerHTML='';
       if(cred.kind==='api'){const im=new Image();im.alt='QR';im.src='/api/live/qr/'+cred.id;im.onerror=()=>{c.innerHTML='';try{new QRCode(c,{text:url,width:260,height:260})}catch(e){c.textContent='(QR not available – share the link)'}};c.appendChild(im)}
@@ -764,7 +772,8 @@ document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>set
     btn.onclick=async()=>{if(cred)return showQR();btn.disabled=true;say('Starting…');
       try{const r=await fetch('/api/live/sessions',{method:'POST'});if(!r.ok)throw 0;const j=await r.json();if(!/^[0-9a-f]{24}$/.test(j.session||''))throw 0;cred={kind:'api',id:j.session,key:j.key}}
       catch(e){const a=new Uint8Array(12);crypto.getRandomValues(a);cred={kind:'ntfy',id:'fais-deck-'+[...a].map(b=>b.toString(16).padStart(2,'0')).join('')}}
-      btn.disabled=false;btn.textContent='Show View QR';last='';await push();setInterval(()=>{last='';push()},20000);showQR()};
+      btn.disabled=false;btn.textContent='Show View QR';push(true);setInterval(()=>push(true),30000);
+      const wake=()=>{if(document.visibilityState==='visible')push(true)};document.addEventListener('visibilitychange',wake);addEventListener('pageshow',wake);addEventListener('online',()=>push(true));showQR()};
     return}
   if(isV){
     window.LIVE_VIEW=true;document.documentElement.classList.add('viewer');box.hidden=false;
@@ -773,7 +782,8 @@ document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>set
     let lastTs=0;
     function apply(st){if(!st||typeof st!=='object'||typeof st.slide!=='number')return;if(st.ts&&st.ts<lastTs)return;lastTs=st.ts||lastTs;
       if(st.slide!==cur)show(st.slide);
-      if(st.hmi&&st.hmi.id&&st.hmi.id!==window.seenHmi){window.seenHmi=st.hmi.id;if(st.hmi.side==='reset')hReset();else if(HSEQ[st.hmi.side]&&typeof st.hmi.i==='number'){const anim=HP.side===st.hmi.side&&st.hmi.i===HP.i+1;HP.playing=!!st.hmi.playing;hGo(st.hmi.side,st.hmi.i,anim)}}
+      if(st.hmi&&st.hmi.id&&st.hmi.id!==window.seenHmi){window.seenHmi=st.hmi.id;if(st.hmi.side==='reset')hReset();else if(HSEQ[st.hmi.side]&&typeof st.hmi.i==='number'){const h=st.hmi;clearTimeout(HP.t);if(h.i<0&&h.playing){hReset()}const anim=HP.side===h.side&&h.i===HP.i+1;HP.playing=!!h.playing;
+        if(!(h.playing&&HP.side===h.side&&HP.i>h.i))hGo(h.side,h.i,anim);if(HP.playing)hSched();else hBtns()}}
       if(st.ink&&st.ink.id&&st.ink.id!==window.seenInk&&Array.isArray(st.ink.pts)){window.seenInk=st.ink.id;if(st.ink.pts[0]&&st.ink.pts[0][0]===-99)strokes=[];else if(Date.now()-st.ink.id<15000)addStroke(st.ink.pts)}
       for(const id in (st.tabs||{}))if(tabState[id]!==st.tabs[id])setTab(id,+st.tabs[id],false);
       const vs=[...document.querySelectorAll('video')];(st.videos||[]).forEach((x,i)=>{const v=vs[i];if(!v||!x)return;
@@ -781,9 +791,16 @@ document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>set
         if(x.p&&v.paused){v.muted=true;v.play().catch(()=>{})}else if(!x.p&&!v.paused)v.pause()});
       say('Following presenter',true)}
     if(sess){let rev=-1;const poll=async()=>{try{const r=await fetch('/api/live/sessions/'+sess,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();if(j.revision!==rev){rev=j.revision;apply(j.state)}else say('Following presenter',true)}catch(e){say('Waiting for presenter session')}finally{setTimeout(poll,900)}};poll()}
-    else{say('Connecting…');
-      fetch(NTFY+topic+'/json?poll=1&since=30m').then(r=>r.text()).then(t=>{const ls=t.trim().split('\n').filter(Boolean).map(l=>{try{return JSON.parse(l)}catch(e){return null}}).filter(m=>m&&m.event==='message');const m=ls[ls.length-1];if(m)try{apply(JSON.parse(m.message))}catch(e){}}).catch(()=>{});
-      const es=new EventSource(NTFY+topic+'/sse');es.onmessage=e=>{try{const m=JSON.parse(e.data);if(m.event==='message')apply(JSON.parse(m.message))}catch(err){}};es.onerror=()=>say('Reconnecting…');es.onopen=()=>say('Waiting for presenter',true)}
+    else{say('Connecting…');let es=null,lastMsg=Date.now(),polling=false;
+      const pollLatest=async()=>{if(polling)return;polling=true;try{const t=await (await fetch(NTFY+topic+'/json?poll=1&since=10m',{cache:'no-store'})).text();
+        const ls=t.trim().split('\n').filter(Boolean).map(l=>{try{return JSON.parse(l)}catch(e){return null}}).filter(m=>m&&m.event==='message');const m=ls[ls.length-1];if(m){lastMsg=Date.now();try{apply(JSON.parse(m.message))}catch(e){}}}catch(e){}finally{polling=false}};
+      const connect=()=>{try{es&&es.close()}catch(e){}es=new EventSource(NTFY+topic+'/sse');
+        es.onmessage=e=>{lastMsg=Date.now();try{const m=JSON.parse(e.data);if(m.event==='message')apply(JSON.parse(m.message))}catch(err){}};
+        es.onerror=()=>say('Reconnecting…');es.onopen=()=>{say('Following presenter',true)}};
+      const revive=()=>{if(document.visibilityState!=='visible')return;say('Reconnecting…');connect();pollLatest()};
+      pollLatest();connect();
+      document.addEventListener('visibilitychange',revive);addEventListener('pageshow',revive);addEventListener('online',revive);addEventListener('focus',revive);
+      setInterval(()=>{if(document.visibilityState!=='visible')return;if(!es||es.readyState===2||Date.now()-lastMsg>45000){lastMsg=Date.now();connect();pollLatest()}},5000)}
   }
 })();
 }
