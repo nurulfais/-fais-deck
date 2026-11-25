@@ -132,6 +132,7 @@ html.drawing #rpen{background:#e8590c}
 .hmi2{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;min-height:0}
 .hc{padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-height:0}.hc h3{font-size:22px;white-space:nowrap}.hc.after{border:2px solid var(--or)}
 .hh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hbtns{display:flex;gap:6px;flex:none}.hstep{white-space:nowrap;font:700 16px Barlow;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
 .hplay{white-space:nowrap;flex:none;font:700 17px Barlow;padding:7px 12px;border-radius:8px;border:0;background:var(--ink);color:#fff;cursor:pointer}.hplay.or{background:var(--or)}
 .leds{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .led{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;background:#f3f2ee;border-radius:6px;padding:5px 6px;white-space:nowrap;overflow:hidden}
@@ -311,12 +312,12 @@ html.remote #remote{display:block;position:static;padding:12px 14px 60px;color:#
   <div class="row" style="margin-top:16px">
     <div class="main">
       <div class="hmi2">
-        <div class="card hc" id="hc-b"><div class="hh"><h3>Before · PLC HMI is master</h3><button class="hplay" id="hp-b" data-side="b">▶ Play</button></div>
+        <div class="card hc" id="hc-b"><div class="hh"><h3>Before · PLC master</h3><span class="hbtns"><button class="hstep" id="hs-b" data-side="b">Step ▸</button><button class="hplay" id="hp-b" data-side="b">▶ Play</button></span></div>
           <div class="leds" id="led-b"></div>
           <div class="where"><span class="wp" data-w="plc">PLC HMI panel</span><span class="wp" data-w="pen">Robot pendant</span><i class="op" title="Operator"></i></div>
           <ol class="seq" id="seq-b"></ol>
           <div class="hres" id="res-b">10 steps · 2 panels · 3 walks</div></div>
-        <div class="card hc after" id="hc-a"><div class="hh"><h3>After · Pendant HMI (kaizen)</h3><button class="hplay or" id="hp-a" data-side="a">▶ Play</button></div>
+        <div class="card hc after" id="hc-a"><div class="hh"><h3>After · Pendant HMI</h3><span class="hbtns"><button class="hstep" id="hs-a" data-side="a">Step ▸</button><button class="hplay or" id="hp-a" data-side="a">▶ Play</button></span></div>
           <div class="leds" id="led-a"></div>
           <div class="where"><span class="wp off" data-w="plc">PLC HMI panel</span><span class="wp" data-w="pen">Robot pendant</span><i class="op" title="Operator"></i></div>
           <ol class="seq" id="seq-a"></ol>
@@ -614,10 +615,13 @@ scenes.hmi=(svg,tok)=>{
   const setLamp=c=>{lamp.r.setAttribute('fill',c==='r'?'#ff3b30':'#5a2a27');lamp.a.setAttribute('fill',c==='a'?'#ffb400':'#5a4a1f');lamp.g.setAttribute('fill',c==='g'?'#22c55e':'#1f4a33');lamp.r.style.animation=c==='rb'?'bl .5s steps(2) infinite':'';if(c==='rb')lamp.r.setAttribute('fill','#ff3b30')};
   const arm=Arm(svg,{bx:150,by:350,L1:185,L2:175,L3:60,s:.85,tools:{grip:TOOLS.grip}});arm.mount('grip');
   const st=label(svg,20,34,'',{'font-size':20,fill:'#16191d','font-weight':700});
+  const st2=S=>{st.textContent=S.robot==='IN JIG'?(S.alarm?'ALARM · robot stopped inside jig':'Robot inside jig'):S.robot==='SAFE'?'Robot in safe area':S.mode==='AUTO'?'Auto running':'Robot HOME · manual'};
   let t2={dead:false,timers:[]};
   const init=()=>{t2.dead=true;t2={dead:false,timers:[]};arm.set(...P.home);clamp.setAttribute('y',360);setLamp('g');zone.setAttribute('opacity',0);zl.setAttribute('opacity',0);st.textContent='Auto running'};
   init();
-  hmiArm={reset:init,act:async k=>{
+  hmiArm={reset:init,snap:st=>{t2.dead=true;t2={dead:false,timers:[]};arm.set(...(st.robot==='IN JIG'?P.jig:st.robot==='SAFE'?P.clear:P.home));clamp.setAttribute('y',st.jig==='OPEN'?300:360);
+      setLamp(st.alarm==='blink'?'rb':st.alarm?'r':st.mode==='MANUAL'?'a':'g');const inj=st.robot==='IN JIG';zone.setAttribute('opacity',inj?.12:0);zl.setAttribute('opacity',inj?1:0);
+      st2(st)},act:async k=>{
     if(k==='alarm'){t2.dead=true;t2={dead:false,timers:[]};arm.set(...P.jig);clamp.setAttribute('y',360);setLamp('rb');zone.setAttribute('opacity',.12);zl.setAttribute('opacity',1);st.textContent='ALARM · robot stopped inside jig'}
     else if(k==='reset'){setLamp('r');st.textContent='Alarm reset'}
     else if(k==='manual'){setLamp('a');st.textContent='Manual mode'}
@@ -673,23 +677,34 @@ document.querySelectorAll('video').forEach((v,i)=>{v.dataset.vi=i;for(const ev o
 const HSEQ={b:[['Robot stops in jig · ALARM','','alarm'],['Walk to PLC HMI panel','walk','plc'],['Reset alarm','plc','reset'],['Auto → Manual mode','plc','manual'],['Unclamp jig','plc','unclamp'],['Walk to robot pendant','walk','pen'],['Jog robot out to safe area','pen','clear'],['Robot HOME','pen','home'],['Walk back to PLC HMI','walk','plc'],['Manual → Auto · Start','plc','auto']],
  a:[['Robot stops in jig · ALARM','','alarm'],['Reset alarm','pen','reset'],['Auto → Manual (PLC follows)','pen','manual'],['Unclamp jig (PLC permission)','pen','unclamp'],['Move to taught safe area','pen','clear'],['Robot HOME','pen','home'],['Manual → Auto · Start','pen','auto']]};
 const TAGN={plc:'PLC HMI',pen:'Pendant',walk:'Walk',"":''};
-let hTimers=[];
+let HP={side:null,i:-1,playing:false,t:null};window.__hp=()=>[HP.side,HP.i,HP.playing];
 function hState(side,st){const L=document.getElementById('led-'+side);
   const led=(n,c,t)=>`<div class="led ${c}"><b></b>${n} ${t}</div>`;
   L.innerHTML=led('Alarm',st.alarm==='blink'?'red blink':st.alarm?'red':'',st.alarm?'ON':'OFF')+led('',st.mode==='AUTO'?'grn':'amb',st.mode)+led('Jig',st.jig==='CLAMP'?'blu':'',st.jig)+led('Robot',st.robot==='HOME'?'grn':st.robot==='IN JIG'?'red':'amb',st.robot)}
 function hOp(side,w){const c=document.getElementById('hc-'+side);c.querySelectorAll('.wp').forEach(x=>x.classList.toggle('on',x.dataset.w===w));c.querySelector('.op').style.left=w==='plc'?'25%':'75%'}
 function hInit(side){const sq=document.getElementById('seq-'+side);sq.innerHTML=HSEQ[side].map(([t,w])=>`<li>${t}${w?`<span class="tg2 ${w}">${TAGN[w]}</span>`:''}</li>`).join('');
   hState(side,{alarm:false,mode:'AUTO',jig:'CLAMP',robot:'HOME'});hOp(side,side==='a'?'pen':'plc');document.getElementById('res-'+side).classList.remove('on')}
-function hRun(side){hTimers.forEach(clearTimeout);hTimers=[];['a','b'].forEach(hInit);
-  const st={alarm:false,mode:'AUTO',jig:'CLAMP',robot:'HOME'};const lis=[...document.querySelectorAll('#seq-'+side+' li')];let t=200;
-  HSEQ[side].forEach(([txt,w,act],i)=>{hTimers.push(setTimeout(()=>{lis.forEach((l,k)=>{l.classList.toggle('on',k===i);l.classList.toggle('done',k<i)});
-      if(w==='walk')hOp(side,act);else if(w)hOp(side,w);
-      if(act==='alarm'){st.alarm='blink';st.robot='IN JIG'}else if(act==='reset')st.alarm=false;else if(act==='manual')st.mode='MANUAL';else if(act==='unclamp')st.jig='OPEN';else if(act==='clear')st.robot='SAFE';else if(act==='home')st.robot='HOME';else if(act==='auto'){st.mode='AUTO';st.jig='CLAMP'}
-      hState(side,st);if(hmiArm&&w!=='walk')hmiArm.act(act)},t));t+=w==='walk'?1500:1050});
-  hTimers.push(setTimeout(()=>{lis.forEach(l=>{l.classList.remove('on');l.classList.add('done')});document.getElementById('res-'+side).classList.add('on')},t))}
-function hReset(){hTimers.forEach(clearTimeout);hTimers=[];['a','b'].forEach(hInit);if(hmiArm)hmiArm.reset()}
-document.querySelectorAll('.hplay').forEach(b=>b.onclick=()=>{if(window.LIVE_VIEW)return;const side=b.dataset.side;if(tabState['m-hmi'])setTab('m-hmi',0,false);hRun(side);window.hmiEvt={id:Date.now(),side};window.livePush&&livePush()});
-document.getElementById('h-reset').onclick=()=>{if(window.LIVE_VIEW)return;hReset();window.hmiEvt={id:Date.now(),side:'reset'};window.livePush&&livePush()};hReset();
+function hBtns(){['a','b'].forEach(sd=>{const b=document.getElementById('hp-'+sd);if(!b)return;const n=HSEQ[sd].length;
+  b.textContent=HP.side===sd&&HP.playing?'❚❚ Pause':HP.side===sd&&HP.i>=n-1?'↺ Replay':HP.side===sd&&HP.i>=0?'▶ Resume':'▶ Play'});try{buildRMedia()}catch(e){}}
+function hRender(side,i,animate){const other=side==='a'?'b':'a';hInit(other);
+  const seq=HSEQ[side],n=seq.length,lis=[...document.querySelectorAll('#seq-'+side+' li')];
+  const st={alarm:false,mode:'AUTO',jig:'CLAMP',robot:'HOME'};let w0=side==='a'?'pen':'plc';
+  for(let k=0;k<=i&&k<n;k++){const [,w,act]=seq[k];if(w==='walk')w0=act;else if(w)w0=w;
+    if(act==='alarm'){st.alarm='blink';st.robot='IN JIG'}else if(act==='reset')st.alarm=false;else if(act==='manual')st.mode='MANUAL';else if(act==='unclamp')st.jig='OPEN';else if(act==='clear')st.robot='SAFE';else if(act==='home')st.robot='HOME';else if(act==='auto'){st.mode='AUTO';st.jig='CLAMP'}}
+  lis.forEach((l,k)=>{l.classList.toggle('on',k===i);l.classList.toggle('done',k<i)});hOp(side,w0);hState(side,st);
+  document.getElementById('res-'+side).classList.toggle('on',i>=n-1);
+  if(hmiArm){if(animate&&i>=0&&seq[i][1]!=='walk')hmiArm.act(seq[i][2]);else hmiArm.snap(st)}}
+function hSched(){clearTimeout(HP.t);if(!HP.playing)return;const seq=HSEQ[HP.side];if(HP.i>=seq.length-1){HP.playing=false;hBtns();return}
+  const w=HP.i>=0?seq[HP.i][1]:'';HP.t=setTimeout(()=>{hGo(HP.side,HP.i+1,true);hSched()},HP.i<0?150:(w==='walk'?1500:1100))}
+function hGo(side,i,animate){HP.side=side;HP.i=i;hRender(side,i,animate);hBtns();if(!window.LIVE_VIEW){window.hmiEvt={id:Date.now(),side,i,playing:HP.playing};window.livePush&&livePush()}}
+function hReset(){clearTimeout(HP.t);HP={side:null,i:-1,playing:false,t:null};['a','b'].forEach(hInit);if(hmiArm)hmiArm.reset();hBtns()}
+function hEnsureSim(){if(tabState['m-hmi'])setTab('m-hmi',0,false)}
+document.querySelectorAll('.hplay').forEach(b=>b.onclick=()=>{if(window.LIVE_VIEW)return;const side=b.dataset.side,n=HSEQ[side].length;hEnsureSim();
+  if(HP.side!==side||HP.i>=n-1){hReset();HP.side=side;HP.i=-1;HP.playing=true;hBtns();hSched();return}
+  HP.playing=!HP.playing;hBtns();if(HP.playing)hSched();else{clearTimeout(HP.t);hGo(side,HP.i,false)}});
+document.querySelectorAll('.hstep').forEach(b=>b.onclick=()=>{if(window.LIVE_VIEW)return;const side=b.dataset.side,n=HSEQ[side].length;hEnsureSim();
+  clearTimeout(HP.t);HP.playing=false;if(HP.side!==side||HP.i>=n-1){hReset();HP.side=side;HP.i=-1}hGo(side,HP.i+1,true)});
+document.getElementById('h-reset').onclick=()=>{if(window.LIVE_VIEW)return;hReset();window.hmiEvt={id:Date.now(),side:'reset',i:-1};window.livePush&&livePush()};hReset();
 const m=/^#s(\d+)$/.exec(location.hash);show(m?+m[1]-1:0);
 
 /* ---------- pointer / ink ---------- */
@@ -713,7 +728,7 @@ document.getElementById('rclr').onclick=()=>{strokes=[];window.lastInk={id:Date.
 /* remote media controls */
 function buildRMedia(){const r=document.getElementById('rmedia');if(!r)return;const sl=slides[cur];let h='';
   sl.querySelectorAll('.tabs').forEach(t=>t.querySelectorAll('button').forEach(b=>{h+=`<button data-f="${t.dataset.for}" data-k="${b.dataset.show}" class="${b.getAttribute('aria-pressed')==='true'?'on':''}">${b.textContent}</button>`}));
-  sl.querySelectorAll('.hplay').forEach(b=>{h+=`<button class="pl" data-ext="${b.id}" style="background:${b.classList.contains('or')?'#e8590c':'#2a2e33'}">${b.closest('.hc').querySelector('h3').textContent} ▶</button>`});
+  sl.querySelectorAll('.hplay').forEach(b=>{const sd=b.dataset.side,nm=sd==='a'?'After':'Before';h+=`<button class="pl" data-ext="${b.id}" style="flex-basis:48%;background:${sd==='a'?'#e8590c':'#2a2e33'}">${nm}: ${b.textContent}</button><button class="pl" data-ext="hs-${sd}" style="flex-basis:48%;background:#3a3f45">${nm}: Step ▸</button>`});
   const v=[...sl.querySelectorAll('video')].find(x=>x.getClientRects().length);
   if(v)h+=`<button class="pl" id="rplay">${v.paused?'▶ Play video':'❚❚ Pause video'}</button>`;
   r.innerHTML=h}
@@ -758,7 +773,7 @@ document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>set
     let lastTs=0;
     function apply(st){if(!st||typeof st!=='object'||typeof st.slide!=='number')return;if(st.ts&&st.ts<lastTs)return;lastTs=st.ts||lastTs;
       if(st.slide!==cur)show(st.slide);
-      if(st.hmi&&st.hmi.id&&st.hmi.id!==window.seenHmi){window.seenHmi=st.hmi.id;if(Date.now()-st.hmi.id<15000){if(st.hmi.side==='reset')hReset();else hRun(st.hmi.side)}}
+      if(st.hmi&&st.hmi.id&&st.hmi.id!==window.seenHmi){window.seenHmi=st.hmi.id;if(st.hmi.side==='reset')hReset();else if(HSEQ[st.hmi.side]&&typeof st.hmi.i==='number'){const anim=HP.side===st.hmi.side&&st.hmi.i===HP.i+1;HP.playing=!!st.hmi.playing;hGo(st.hmi.side,st.hmi.i,anim)}}
       if(st.ink&&st.ink.id&&st.ink.id!==window.seenInk&&Array.isArray(st.ink.pts)){window.seenInk=st.ink.id;if(st.ink.pts[0]&&st.ink.pts[0][0]===-99)strokes=[];else if(Date.now()-st.ink.id<15000)addStroke(st.ink.pts)}
       for(const id in (st.tabs||{}))if(tabState[id]!==st.tabs[id])setTab(id,+st.tabs[id],false);
       const vs=[...document.querySelectorAll('video')];(st.videos||[]).forEach((x,i)=>{const v=vs[i];if(!v||!x)return;
