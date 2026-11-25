@@ -406,6 +406,7 @@ html.remote #remote{display:block;position:static;padding:12px 14px 60px;color:#
 <div id="remote"><div class="lv"><span id="rstat">Presenter</span><button id="rlive">Start live session</button></div><div class="rb"><button id="rprev">← Back</button><button class="nx" id="rnext">Next →</button></div><div class="top"><span class="ttl" id="rttl"></span><span id="rcnt"></span></div><div class="tl2"><button id="rpen">✏️ Pointer: OFF</button><button id="rclr">Clear drawing</button></div><div class="md" id="rmedia"></div><div class="nt" id="rnote"></div><div class="ds" id="rds"></div></div>
 <div id="qr" role="dialog" aria-label="Scan to follow"><div class="box"><b style="font-size:22px">Scan to follow this presentation</b><div id="qrc"></div><a id="qrl" target="_blank"></a><br><button id="qrx">Close</button></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <script>
 {
 const NS='http://www.w3.org/2000/svg';
@@ -748,7 +749,12 @@ document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>set
   const say=(t,ok)=>{stat.textContent=t;box.classList.toggle('ok',!!ok)};
   const snap=()=>({slide:cur,ink:window.lastInk||null,hmi:window.hmiEvt||null,tabs:{...tabState},videos:[...document.querySelectorAll('video')].map(v=>({p:!v.paused&&!v.ended,t:Math.round(v.currentTime*10)/10})),ts:Date.now()});
   const NTFY='https://ntfy.sh/';
-  const viewerURL=(kind,id)=>{const base=location.href.split('#')[0].split('?')[0].replace(/(presenter|viewer|index)\.html$/,'');return kind==='api'?base+'viewer.html?session='+id:base+'viewer.html?topic='+id};
+  const BROKERS=['wss://broker.emqx.io:8084/mqtt','wss://test.mosquitto.org:8081'];
+  const mqOK=()=>typeof mqtt!=='undefined';
+  const mqConnect=(onState)=>BROKERS.map(u=>{try{const c=mqtt.connect(u,{reconnectPeriod:2000,connectTimeout:8000,keepalive:20,clean:true});c.on('connect',onState);c.on('close',onState);c.on('offline',onState);c.on('error',()=>{});return c}catch(e){return null}}).filter(Boolean);
+  const mqAny=cs=>cs.some(c=>c.connected);
+  const mqRevive=cs=>cs.forEach(c=>{if(!c.connected&&!c.reconnecting)try{c.reconnect()}catch(e){}});
+  const viewerURL=(kind,id)=>{const base=location.href.split('#')[0].split('?')[0].replace(/(presenter|viewer|index)\.html$/,'');return kind==='api'?base+'viewer.html?session='+id:kind==='mq'?base+'viewer.html?r='+id:base+'viewer.html?topic='+id};
   let wl=null;const keepAwake=async()=>{try{if('wakeLock' in navigator&&document.visibilityState==='visible'&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null})}}catch(e){}};
   addEventListener('pointerdown',keepAwake);document.addEventListener('visibilitychange',keepAwake);keepAwake();
   if(isP){
@@ -759,6 +765,7 @@ document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>set
     function push(force){if(!cred)return;const key=JSON.stringify(vis());if(!force&&key===lastKey&&!retry)return;clearTimeout(deb);deb=setTimeout(send,force?0:180)}
     async function send(){if(sending){clearTimeout(deb);deb=setTimeout(send,300);return}sending=true;clearTimeout(retry);retry=null;const body=JSON.stringify(snap());const key=JSON.stringify(vis());
       try{let r;if(cred.kind==='api')r=await fetch('/api/live/sessions/'+cred.id,{method:'PUT',headers:{'Content-Type':'application/json','X-Presenter-Key':cred.key},body});
+        else if(cred.kind==='mq'){if(!mqAny(cred.cs)){mqRevive(cred.cs);throw 'off'}cred.cs.forEach(c=>{if(c.connected)c.publish('faisdeck/'+cred.id,body,{retain:true,qos:0})});r={ok:true}}
         else r=await fetch(NTFY+cred.id,{method:'POST',body});if(!r.ok)throw r.status;
         lastKey=key;fails=0;say('Session live',true)}
       catch(e){fails++;say(e===429?'Busy · retrying…':'Sync interrupted · retrying…');retry=setTimeout(()=>{retry=null;send()},Math.min(10000,2000*fails))}
@@ -771,14 +778,15 @@ document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>set
     document.getElementById('qrx').onclick=()=>document.getElementById('qr').classList.remove('on');
     btn.onclick=async()=>{if(cred)return showQR();btn.disabled=true;say('Starting…');
       try{const r=await fetch('/api/live/sessions',{method:'POST'});if(!r.ok)throw 0;const j=await r.json();if(!/^[0-9a-f]{24}$/.test(j.session||''))throw 0;cred={kind:'api',id:j.session,key:j.key}}
-      catch(e){const a=new Uint8Array(12);crypto.getRandomValues(a);cred={kind:'ntfy',id:'fais-deck-'+[...a].map(b=>b.toString(16).padStart(2,'0')).join('')}}
+      catch(e){const a=new Uint8Array(12);crypto.getRandomValues(a);const hx=[...a].map(b=>b.toString(16).padStart(2,'0')).join('');
+        if(mqOK()){cred={kind:'mq',id:hx,cs:mqConnect(()=>{if(cred&&mqAny(cred.cs))push(true);else say('Reconnecting…')})};await new Promise(r=>setTimeout(r,1500))}else cred={kind:'ntfy',id:'fais-deck-'+hx}}
       btn.disabled=false;btn.textContent='Show View QR';push(true);setInterval(()=>push(true),30000);
-      const wake=()=>{if(document.visibilityState==='visible')push(true)};document.addEventListener('visibilitychange',wake);addEventListener('pageshow',wake);addEventListener('online',()=>push(true));showQR()};
+      const wake=()=>{if(document.visibilityState==='visible'){if(cred.cs)mqRevive(cred.cs);push(true)}};document.addEventListener('visibilitychange',wake);addEventListener('pageshow',wake);addEventListener('online',()=>push(true));showQR()};
     return}
   if(isV){
     window.LIVE_VIEW=true;document.documentElement.classList.add('viewer');box.hidden=false;
-    const sess=q.get('session'),topic=q.get('topic');
-    if(!(sess&&/^[0-9a-f]{24}$/.test(sess))&&!(topic&&/^fais-deck-[0-9a-f]{24}$/.test(topic))){say('Scan the QR from Presenter.');return}
+    const sess=q.get('session'),topic=q.get('topic'),rid=q.get('r');
+    if(!(sess&&/^[0-9a-f]{24}$/.test(sess))&&!(topic&&/^fais-deck-[0-9a-f]{24}$/.test(topic))&&!(rid&&/^[0-9a-f]{24}$/.test(rid))){say('Scan the QR from Presenter.');return}
     let lastTs=0;
     function apply(st){if(!st||typeof st!=='object'||typeof st.slide!=='number')return;if(st.ts&&st.ts<lastTs)return;lastTs=st.ts||lastTs;
       if(st.slide!==cur)show(st.slide);
@@ -790,7 +798,13 @@ document.querySelectorAll('video').forEach(v=>{v.addEventListener('play',()=>set
         if(Math.abs(v.currentTime-x.t)>1.5)try{v.currentTime=x.t}catch(e){}
         if(x.p&&v.paused){v.muted=true;v.play().catch(()=>{})}else if(!x.p&&!v.paused)v.pause()});
       say('Following presenter',true)}
-    if(sess){let rev=-1;const poll=async()=>{try{const r=await fetch('/api/live/sessions/'+sess,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();if(j.revision!==rev){rev=j.revision;apply(j.state)}else say('Following presenter',true)}catch(e){say('Waiting for presenter session')}finally{setTimeout(poll,900)}};poll()}
+    if(rid){say('Connecting…');const wait=()=>{if(!mqOK())return setTimeout(wait,300);
+        const cs=mqConnect(()=>say(mqAny(cs)?'Following presenter':'Reconnecting…',mqAny(cs)));
+        cs.forEach(c=>{c.on('connect',()=>c.subscribe('faisdeck/'+rid,{qos:0}));c.on('message',(t,m)=>{try{apply(JSON.parse(m.toString()))}catch(e){}})});
+        const revive=()=>{if(document.visibilityState==='visible')mqRevive(cs)};
+        document.addEventListener('visibilitychange',revive);addEventListener('pageshow',revive);addEventListener('online',revive);addEventListener('focus',revive);
+        setInterval(()=>{if(document.visibilityState==='visible'&&!mqAny(cs))mqRevive(cs)},4000)};wait()}
+    else if(sess){let rev=-1;const poll=async()=>{try{const r=await fetch('/api/live/sessions/'+sess,{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();if(j.revision!==rev){rev=j.revision;apply(j.state)}else say('Following presenter',true)}catch(e){say('Waiting for presenter session')}finally{setTimeout(poll,900)}};poll()}
     else{say('Connecting…');let es=null,lastMsg=Date.now(),polling=false;
       const pollLatest=async()=>{if(polling)return;polling=true;try{const t=await (await fetch(NTFY+topic+'/json?poll=1&since=10m',{cache:'no-store'})).text();
         const ls=t.trim().split('\n').filter(Boolean).map(l=>{try{return JSON.parse(l)}catch(e){return null}}).filter(m=>m&&m.event==='message');const m=ls[ls.length-1];if(m){lastMsg=Date.now();try{apply(JSON.parse(m.message))}catch(e){}}}catch(e){}finally{polling=false}};
